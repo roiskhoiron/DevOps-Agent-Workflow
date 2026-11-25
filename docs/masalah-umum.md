@@ -11,6 +11,8 @@
 | "agen tidak memicu pipeline" | Pipeline deploy dijalankan manusia; agen hanya membaca log-nya |
 | `recap-check.sh --idempotent` exit 1 | Run kedua masih mengubah sesuatu: task `command`/`shell` tanpa `creates`/`changed_when`, template berubah tiap run, atau restart langsung |
 | `runbook-check.py` exit 1 | Runbook dan playbook belum cocok: bagian hilang, task tanpa langkah, atau langkah tanpa task |
+| Codex tidak memblokir apa pun | Hook baru di Codex harus disetujui dulu: ketik `/hooks` di Codex lalu setujui "DevOps guard". Hook project hanya jalan di project yang dipercaya |
+| Perintah `/develop-tiket` tidak dikenal | Tool itu tidak memakai perintah `/`; sebut nama skill-nya: "jalankan skill develop-tiket untuk OPS-12". Pastikan installer sudah dijalankan untuk tool itu (`--agent`) |
 | Installer exit 3 "Bentrok" | Workflow role lain (Mobile) terpasang dengan nama yang sama; pakai `--force` bila komputer ini untuk DevOps |
 | Agen bertanya "Tiket untuk project ini dikelola di mana?" | Platform tiket belum pernah dipilih (memory **none**). Pilih Jira, GitHub Projects, GitLab board, atau manual; ragu → ikuti saran agen |
 | "belum punya daftar status" | Project/papan baru: pilih status Todo, In Progress, Ready To Review dari daftar yang ditunjukkan agen |

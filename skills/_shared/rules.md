@@ -12,7 +12,7 @@ Dua prinsip yang membedakan workflow DevOps dari role lain:
   `export AGENT_WORKFLOW_DIR="$(cd ~/.agent-workflow/devops && pwd -P)"`
   Tiap panggilan Bash = shell baru: ulangi export ini di awal panggilan yang memakai skrip.
 - State lokal (bukan di repo): `${AGENT_WORKFLOW_STATE:-$HOME/.agent-workflow}/` — `ticket-transitions.json`, `ansible-inventories.json`, kunci (`locks/`), log run (`runs/`).
-- **Lokasi khusus project tidak pernah ditulis di konfigurasi global** (agen, skill, rules, guard, CLAUDE.md global). Agen membaca memory project Claude Code (`MEMORY.md` project) dan `## Catatan agen` di `CLAUDE.md` project. Belum ada → tanya user sekali (dengan satu saran), simpan sebagai memory project tipe `reference`, lalu pakai. Berubah/tidak ditemukan → perbarui setelah bertanya. Isi memory project DevOps:
+- **Lokasi khusus project tidak pernah ditulis di konfigurasi global** (agen, skill, rules, guard, CLAUDE.md global). Agen membaca **memory project** dan `## Catatan agen` di file instruksi project (`CLAUDE.md` / `AGENTS.md` / `GEMINI.md`). Memory project = fitur memory tool bila ada (Claude Code: `MEMORY.md` project); tool tanpa memory → file `~/.agent-workflow/projects/<repo>/memory.md` (di luar repo; `<repo>` = nama folder checkout utama), satu baris per kunci `- <Kunci>: <nilai>`. Belum ada → tanya user sekali (dengan satu saran), simpan sebagai memory project tipe `reference`, lalu pakai. Berubah/tidak ditemukan → perbarui setelah bertanya. Isi memory project DevOps:
 
   | Kunci | Isi | Contoh saran saat bertanya |
   |---|---|---|

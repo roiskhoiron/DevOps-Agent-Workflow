@@ -1,6 +1,6 @@
 # DevOps-Agent-Workflow
 
-Tim agen AI (Claude Code) yang mengerjakan **tiket infrastruktur** (di Jira, GitHub Projects, GitLab issue board, atau tanpa platform) dari **Todo sampai Ready To Review**: mengecek tiket, menulis runbook, menulis playbook Ansible, mengujinya di staging, meminta persetujuan, lalu membuat PR/MR.
+Tim agen AI untuk **AI coding agent pilihanmu** (Claude Code, Codex, Gemini CLI, Cursor, GitHub Copilot, OpenCode) yang mengerjakan **tiket infrastruktur** (di Jira, GitHub Projects, GitLab issue board, atau tanpa platform) dari **Todo sampai Ready To Review**: mengecek tiket, menulis runbook, menulis playbook Ansible, mengujinya di staging, meminta persetujuan, lalu membuat PR/MR.
 
 Kamu cukup mengetik satu perintah, misalnya `/develop-tiket OPS-1234`. Agen bekerja; kamu memeriksa hasil dan menyetujui.
 
@@ -57,7 +57,7 @@ pipx install ansible-lint
 # opsional, untuk menguji role di container:
 pipx install molecule && pipx inject molecule "molecule-plugins[docker]"
 ```
-Kamu juga butuh **Claude Code**. Orca dan Docker opsional.
+Kamu juga butuh minimal satu **AI coding agent** (lihat tabel di langkah 3). Orca dan Docker opsional.
 
 **2. Sambungkan akun**
 - Login CLI repo: `gh auth login` (GitHub) atau `glab auth login` (GitLab).
@@ -66,11 +66,37 @@ Kamu juga butuh **Claude Code**. Orca dan Docker opsional.
 **3. Pasang workflow ini**
 ```bash
 git clone https://github.com/roiskhoiron/DevOps-Agent-Workflow ~/devops-agent-workflow
-bash ~/devops-agent-workflow/install.sh
-bash ~/devops-agent-workflow/tests/run.sh    # harus keluar "ALL PASS"
+bash ~/devops-agent-workflow/install.sh            # tanya: tool apa, scope apa
+bash ~/devops-agent-workflow/tests/run.sh          # harus keluar "ALL PASS"
+```
+Installer menanyakan dua hal:
+
+| Pertanyaan | Pilihan |
+| --- | --- |
+| **AI coding agent** mana? (boleh lebih dari satu) | `claude`, `codex`, `gemini`, `cursor`, `copilot`, `opencode`, atau `all` |
+| **Scope**? | `global` = semua project di komputer ini · `project` = hanya satu repo infrastruktur |
+
+Atau langsung dengan flag (tanpa pertanyaan):
+```bash
+install.sh --agent claude --scope global
+install.sh --agent codex,cursor --scope project --project ~/repo/infra
+install.sh --agent all --yes
 ```
 
-**4. (Opsional) Aktifkan mode tim.** Supaya tiap agen tampil di panel sendiri: jalankan `claude --teammate-mode auto`, atau ketik `/config` → **Teammate mode** → `auto`.
+Seberapa lengkap dukungan tiap tool:
+
+| Tool | Skill | Peran agen | Guard (pemblokir otomatis) |
+| --- | --- | --- | --- |
+| Claude Code | ✅ | ✅ (mode tim penuh) | ✅ |
+| Codex CLI | ✅ | ✅ | ✅ setelah hook disetujui lewat `/hooks` |
+| Gemini CLI | ✅ | ✅ | ✅ |
+| Cursor | ✅ | ✅ | ✅ |
+| GitHub Copilot | ✅ | ✅ | ✅ (hook masih preview) |
+| OpenCode | ✅ | ✅ | ❌ tidak ada hook pemblokir: pagar hanya berupa aturan |
+
+Di tool tanpa mode tim, satu sesi menjalankan peran bergantian (mode solo). Detail per tool: [docs/pasang.md](docs/pasang.md).
+
+**4. (Opsional, Claude Code) Aktifkan mode tim.** Supaya tiap agen tampil di panel sendiri: jalankan `claude --teammate-mode auto`, atau ketik `/config` → **Teammate mode** → `auto`.
 
 **5. Jawab beberapa pertanyaan saat pertama dipakai.** Saat perintah pertama dijalankan di project baru, agen akan bertanya sekali saja lalu mengingatnya. **Pertanyaan pertama selalu soal platform tiket**, karena workflow ini tidak menganggap platform mana pun sebagai default:
 
@@ -104,7 +130,7 @@ Detail: [docs/pasang.md](docs/pasang.md).
 
 ## Perintah sehari-hari
 
-Ketik di Claude Code:
+Ketik di AI coding agent-mu. Tool yang tidak mengenal perintah `/` cukup diberi tahu nama skill-nya, mis. *"jalankan skill develop-tiket untuk OPS-1234"*.
 
 | Kapan | Perintah | Hasilnya |
 | --- | --- | --- |
@@ -185,6 +211,12 @@ Itu berarti pagar bekerja. Baca pesannya; biasanya sudah menyebut cara yang bena
 **Di mana hasil kerja agen?**
 Di repo infrastruktur: `docs/runbooks/` (runbook), `docs/tickets/<KODE>/validasi.md` dan `uji.md` (laporan), ditambah PR/MR dan komentar tiket. Link laporan selalu ada di baris pertama komentar tiket.
 
+**Harus pakai Claude Code?**
+Tidak. Pilih tool saat menjalankan `install.sh`. Skill dan aturannya sama di semua tool; yang berbeda hanya kelengkapan fitur (tabel di langkah 3). Pagar terkuat ada di tool yang punya hook pemblokir; di OpenCode pagar hanya berupa aturan, jadi batasi juga lewat `permissions` OpenCode.
+
+**Bedanya scope global dan project?**
+`global` memasang ke folder home tool, jadi berlaku untuk semua project. `project` memasang ke dalam satu repo (`.claude/`, `.agents/`, `.github/`, `AGENTS.md`, …), cocok bila komputer itu juga dipakai untuk pekerjaan lain. Isinya berupa symlink ke repo workflow ini: tiap anggota tim menjalankan `install.sh` sendiri.
+
 **Harus pakai Jira?**
 Tidak. Pilih Jira, GitHub Projects, GitLab issue board, atau tanpa platform. Agen bertanya di awal dan mengingat jawabannya per project; mengganti platform cukup dengan memberi tahu agen. Di platform mana pun, agen tidak pernah memindah tiket ke Done atau menutup issue, dan tidak menulis `Closes #12` di PR (kata itu menutup issue otomatis saat merge).
 
@@ -214,10 +246,10 @@ Kerangkanya tetap; ganti skill khas Ansible dengan padanannya (contoh Terraform 
 | Folder | Isi |
 | --- | --- |
 | `skills/` | Langkah tiap perintah (`<perintah>/SKILL.md`) dan aturan bersama (`_shared/`) |
-| `agents/` | Peran tiap agen |
-| `hooks/guard.sh` | Pagar keamanan |
+| `agents/` | Peran tiap agen (installer mengubahnya ke format tiap tool) |
+| `hooks/` | Pagar keamanan: `guard.sh`, plus `adapter.sh` yang menerjemahkan format hook Gemini CLI, Cursor, dan Copilot |
 | `bin/` | Skrip pembantu: `lock.sh`, `runbook-check.py`, `recap-check.sh`, `redact.sh`, `risky-scan.sh`, `release-trace.sh`, `audit-mode.sh`, `housekeeping.sh` |
-| `templates/` | Kerangka runbook dan ADR |
+| `templates/` | Kerangka runbook dan ADR, plus blok instruksi yang dipasang ke `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` |
 | `tests/` | Tes otomatis: `bash tests/run.sh` (juga jalan di GitHub Actions) |
 | `docs/` | Panduan untuk pemula |
 

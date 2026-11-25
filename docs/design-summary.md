@@ -32,6 +32,8 @@ Alur kanban, tim agen dan modelnya, mode kerja dan pagar, worktree Orca bertingk
 
 - **Platform tiket tidak punya default.** Draft tidak menunjuk Jira; memory project mulai dari **none**, agen bertanya di awal, dan menyarankan GitHub Projects / GitLab issue board bila user ragu. Semua skill memakai operasi generik (`ticket-platform.md`), guard menjaga Done untuk semua platform.
 
+- **Tidak terikat Claude Code.** `install.sh` memasang ke Claude Code, Codex CLI, Gemini CLI, Cursor, GitHub Copilot, atau OpenCode, dengan scope global atau project. Skill dan peran merujuk lokasi netral `~/.agent-workflow/devops`; guard memakai adaptor per tool; tool tanpa subagen berjalan dalam mode solo.
+
 ## Yang masih terbuka (dari draft)
 - [ ] Apakah tim DevOps memang memakai Ansible, atau alat lain? (padanan Terraform: [alat](alat.md))
 - [ ] Bagaimana inventory dipisah antara staging dan production? (diisi lewat Setup inventory)

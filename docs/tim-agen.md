@@ -19,6 +19,8 @@ Tim dan nama sama dengan workflow Mobile; tugasnya disesuaikan untuk infrastrukt
 
 Di mode tim tiap agen adalah **teammate** Claude Code (*agent teams*), tampil sebagai panel split di workspace yang sama dengan label seperti `@Maman-Programmer1`. Model tiap peran diubah di `agents/<peran>.md`.
 
+**Tool selain Claude Code:** installer membuat file peran dalam format tool itu (Codex `.toml`, Copilot `.agent.md`, dst.) dari `agents/*.md`. Kolom **Model** adalah default untuk Claude; tool lain memakai model yang kamu pilih di tool itu (pakai model terkuat untuk SPV, Reviewer, dan Planner). Tool yang tidak bisa menjalankan subagen bekerja dalam **mode solo**: satu sesi menjalankan peran bergantian, dan laporan mencatat bahwa review tidak independen.
+
 > **Syarat mode tim:** jalankan `claude --teammate-mode auto`, atau sekali di `/config` → **Teammate mode** → `auto`.
 
 **Satu-satunya pekerjaan yang selalu menunggu manusia:** persetujuan pemilik DevOps per tiket, merge PR rilis, dan penerapan ke production.
