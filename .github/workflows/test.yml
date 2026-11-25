@@ -1,0 +1,17 @@
+name: test
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dependencies
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq jq
+          python3 -c 'import yaml' || pip install pyyaml
+      - name: Tests
+        run: |
+          git config --global user.email ci@example.com && git config --global user.name ci
+          bash tests/run.sh
