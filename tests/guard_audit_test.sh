@@ -53,7 +53,7 @@ check 2 'git reflog delete HEAD@{0}'
 check 0 'git reflog -n 5'
 check 0 'gh api repos/o/r/issues -fbody=hi'
 check 0 'gh api repos/o/r/issues -Ftitle=hi'
-check 0 'gh issue develop 12'
+check 2 'gh issue develop 12'   # writes (linked branch): tickets are read-only in audit
 check 0 'gh repo delete o/r --yes'
 check 2 'gh workflow run ci.yml'   # never: agents do not start pipelines
 check 2 'glab mr update 3 --title x'

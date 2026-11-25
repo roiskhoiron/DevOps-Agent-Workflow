@@ -10,9 +10,9 @@ Perbedaan DevOps paling besar di antara semua role, karena yang diuji adalah ser
 - Memicu pipeline: `gh workflow run`, `gh run rerun`, `glab ci run/retry/trigger`, API `dispatches`/`pipeline`.
 - Push ke selain `origin`; force-push/hapus `main`/`master`/`develop` (tag `vX.Y.Z` eksplisit boleh ke `origin` dan `upstream`).
 - `rm -r` di luar folder project (kecuali cache uji di worktree repo yang sama, isi `/tmp/qa` dan `/tmp/validate`).
-- Tiket ke status di luar `jira-transitions.json` (Done tidak pernah ada di sana).
+- Tiket ke status di luar `ticket-transitions.json` (Done tidak pernah ada di sana), menutup issue GitHub/GitLab, label `status::done`, ubah status lewat `gh/glab api`, dan `Closes/Fixes #<n>` di PR/MR. Berlaku untuk Jira, GitHub Projects, dan GitLab board.
 - Edit file di worktree primary; tab/workspace/project Orca baru; worktree di luar folder sejajar.
-- Mode audit: semua penulisan ke repo, git remote, Jira, staging, Vault, Molecule.
+- Mode audit: semua penulisan ke repo, git remote, tiket, staging, Vault, Molecule.
 
 **Tidak ditangkap guard (dijaga aturan skill):** wrapper (`make deploy`, `./deploy.sh`), `ssh` langsung, tulis lewat shell. Karena itu agen wajib memanggil `ansible-playbook` langsung dan tidak pernah `ssh` ke host production.
 
@@ -20,7 +20,7 @@ Perbedaan DevOps paling besar di antara semua role, karena yang diuji adalah ser
 - Persetujuan pemilik DevOps setiap tiket, sebelum PR/MR ditandai siap review.
 - Merge PR rilis ke `<primary>`: hanya manusia. Penerapan ke production: manusia atau pipeline.
 - Tag rilis hanya setelah `/verify-live` lulus.
-- Keluaran ansible disaring `redact.sh` sebelum masuk dokumen, Jira, atau PR/MR.
+- Keluaran ansible disaring `redact.sh` sebelum masuk dokumen, tiket, atau PR/MR.
 
 **Agen selalu berhenti dan bertanya** bila: perubahan menghapus data, me-restart layanan, atau mengubah firewall dan hak akses (`risky-scan.sh`); hotfix; vault password staging tidak ditemukan; staging tidak mewakili production; host staging dipakai tiket lain; dua fix hotfix bentrok.
 

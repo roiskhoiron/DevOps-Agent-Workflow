@@ -23,12 +23,14 @@ Alur kanban, tim agen dan modelnya, mode kerja dan pagar, worktree Orca bertingk
 | Pembersihan berkala | DerivedData, Gradle, APK/IPA | container uji, cache koleksi, log run lama |
 
 ## Keputusan implementasi (di luar draft)
-- **Validasi menerbitkan ke repo** lewat branch tiket di fork, supaya komentar Jira punya link; branch yang hanya berisi `docs/tickets/<KODE>/` tidak dihitung sebagai jejak pengerjaan.
+- **Validasi menerbitkan ke repo** lewat branch tiket di fork, supaya komentar tiket punya link; branch yang hanya berisi `docs/tickets/<KODE>/` tidak dihitung sebagai jejak pengerjaan.
 - **Laporan rilis masuk repo setelah tag**, karena isi `<protected>` tidak boleh berubah setelah `<sha-rilis>` dicatat; selama proses isinya ada di PR rilis.
 - **Cek staging di `<sha-rilis>`** menggantikan "regresi penuh di beta": check mode tiap playbook rilis, harapannya `changed=0`.
 - **Ad-hoc modul baca ke production diizinkan** untuk `/verify-live` dan `/read-logs`; selain itu production tertutup.
 - **Tag setelah `/verify-live` lulus**, mengikuti urutan skill set di draft (verify-live sebelum tag-release).
 - **Satu komputer = satu workflow role**: nama perintah sama dengan Mobile, installer mendeteksi bentrok.
+
+- **Platform tiket tidak punya default.** Draft tidak menunjuk Jira; memory project mulai dari **none**, agen bertanya di awal, dan menyarankan GitHub Projects / GitLab issue board bila user ragu. Semua skill memakai operasi generik (`ticket-platform.md`), guard menjaga Done untuk semua platform.
 
 ## Yang masih terbuka (dari draft)
 - [ ] Apakah tim DevOps memang memakai Ansible, atau alat lain? (padanan Terraform: [alat](alat.md))

@@ -18,7 +18,7 @@ Baca dulu: `~/.claude/skills/_devops-workflow-shared/rules.md`, `infra.md`, `cre
 7. Lapor ke SPV: ringkasan perubahan, commit, hasil lint/molecule/runbook-check, ringkasan check mode (`check.safe.log`). Revisi dari Reviewer dikerjakan di branch yang sama; perubahan task selalu disertai perubahan runbook.
 
 ## Tidak boleh
-- Jira dan dokumen di luar repo.
+- Platform tiket dan dokumen di luar repo.
 - Apply ke staging tanpa `--check` (itu tugas QA); apa pun ke production; Vault production; memicu pipeline.
 - Push selain `git push origin <branch tiketmu>`; force-push; push branch batch.
 - Menyimpan rahasia polos di file yang ter-track.

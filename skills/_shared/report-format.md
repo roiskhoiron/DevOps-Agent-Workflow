@@ -45,7 +45,7 @@ Ditulis di `${TMPDIR:-/tmp}/audit/<slug>/laporan.md` selama audit (mode hanya-ba
 3. **Temuan per pertanyaan**: tiap klaim dengan bukti (file:baris di ref, commit, potongan log disaring, fakta host).
 4. **Perbandingan lampiran vs repo vs host** (bila ada lampiran): tabel `Lampiran | Repo | Host | Beda?`.
 5. **Akar masalah** + keyakinan (**pasti** / **kuat** / **dugaan**), dampak, perkiraan ukuran perbaikan.
-6. **Saran langkah berikutnya** dan **Saran tiket Jira** (tidak dibuat).
+6. **Saran langkah berikutnya** dan **Saran tiket** (tidak dibuat).
 7. **Cara audit**: ref yang dibaca, host/inventory yang diperiksa, alat, hal yang tidak bisa diperiksa (termasuk: guard tidak menangkap `ssh` dan tulis lewat shell).
 
 ## Laporan rilis (`docs/rilis/vX.Y.Z.md`)
@@ -53,7 +53,7 @@ Ditulis di `${TMPDIR:-/tmp}/audit/<slug>/laporan.md` selama audit (mode hanya-ba
 2. Versi + ref (hash `<primary>`, `<protected>`, `<sha-rilis>`).
 3. Tabel perubahan:
 
-| KODE | Ringkasan | Runbook | PR/MR | Programmer | Status Jira |
+| KODE | Ringkasan | Runbook | PR/MR | Programmer | Status tiket |
 |---|---|---|---|---|---|
 
 4. Commit tak terlacak dan tiket belum Done: ditandai.
@@ -62,7 +62,7 @@ Ditulis di `${TMPDIR:-/tmp}/audit/<slug>/laporan.md` selama audit (mode hanya-ba
 7. Rekomendasi agen.
 8. Hasil `/verify-live`, link PR rilis, tag (diisi setelah ada).
 
-## Komentar Jira
+## Komentar tiket
 Ditulis seperti rekan satu tim yang sopan, bisa dipahami pembaca awam (PM, QA, bisnis).
 - Orang pertama **aku**, hangat dan to the point; paling banyak satu emoji.
 - **Bahasa awam:** jelaskan dampaknya bagi pengguna/layanan, bukan detail teknis. Hindari istilah (playbook, inventory, idempoten, check mode); kalau terpaksa, beri arti singkat dalam kurung.
@@ -85,4 +85,4 @@ Langkah penerapan dan cara membatalkannya ada di panduan ini: <link runbook> · 
 Penerapan ke server utama tetap dilakukan tim sesuai jadwal rilis. Terima kasih!
 ```
 
-Kirim lewat `mcp__claude_ai_Atlassian__addCommentToJiraIssue`.
+Kirim lewat operasi **komentar tiket** sesuai platform (`ticket-platform.md`); platform manual → tampilkan di chat untuk ditempel user. Jangan tulis `Closes/Fixes #<n>`; pakai `Refs #<n>`.

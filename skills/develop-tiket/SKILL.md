@@ -1,11 +1,11 @@
 ---
 name: develop-tiket
-description: Kerjakan tiket Jira infrastruktur In Progress sampai Ready To Review dengan urutan documentation first - runbook, playbook mengikuti runbook, lint, check mode, review, apply ke staging dua kali (idempotensi), persetujuan pemilik DevOps, PR/MR, komentar Jira. Tidak pernah menerapkan ke production. Dipanggil lewat `/develop-tiket KODE... [--solo|--tim] [--batch|--separate] [--uat]` dari workspace domain. Use when asked to develop, implement, or fix an infrastructure ticket; kata kunci - kerjakan tiket, develop tiket, buat playbook.
+description: Kerjakan tiket infrastruktur In Progress sampai Ready To Review dengan urutan documentation first - runbook, playbook mengikuti runbook, lint, check mode, review, apply ke staging dua kali (idempotensi), persetujuan pemilik DevOps, PR/MR, komentar tiket. Tidak pernah menerapkan ke production. Dipanggil lewat `/develop-tiket KODE... [--solo|--tim] [--batch|--separate] [--uat]` dari workspace domain. Use when asked to develop, implement, or fix an infrastructure ticket; kata kunci - kerjakan tiket, develop tiket, buat playbook.
 argument-hint: KODE-TIKET... [--solo|--tim] [--batch|--separate] [--uat]
 ---
-Kerjakan satu atau lebih tiket Jira infrastruktur (`$ARGUMENTS`). Sesi ini = **SPV**: ikuti `~/.claude/agents/spv.md` (tidak menulis runbook/playbook, tidak memindah ke Done, tidak menerapkan ke production).
+Kerjakan satu atau lebih tiket infrastruktur (`$ARGUMENTS`). Sesi ini = **SPV**: ikuti `~/.claude/agents/spv.md` (tidak menulis runbook/playbook, tidak memindah ke Done, tidak menerapkan ke production).
 
-Baca dulu (jangan disalin ke sini): `~/.claude/skills/_devops-workflow-shared/rules.md`, `infra.md`, `credentials.md`, `docs-platform.md`, `release.md`, `report-format.md`, serta `~/.claude/agents/{coder,reviewer,qa,release}.md`. Skill set khas (dijalankan peran yang disebut): `~/.claude/skills/{write-runbook,write-playbook,lint-playbook,playbook-check,apply-staging,verify-idempotent,request-approval}/SKILL.md`. Skrip: `$AGENT_WORKFLOW_DIR/bin/<skrip>`. Setiap panggilan `lock.sh` diawali `AGENT_LOCK_PID=$PPID` di panggilan Bash yang sama.
+Baca dulu (jangan disalin ke sini): `~/.claude/skills/_devops-workflow-shared/rules.md`, `ticket-platform.md`, `infra.md`, `credentials.md`, `docs-platform.md`, `release.md`, `report-format.md`, serta `~/.claude/agents/{coder,reviewer,qa,release}.md`. Skill set khas (dijalankan peran yang disebut): `~/.claude/skills/{write-runbook,write-playbook,lint-playbook,playbook-check,apply-staging,verify-idempotent,request-approval}/SKILL.md`. Skrip: `$AGENT_WORKFLOW_DIR/bin/<skrip>`. Setiap panggilan `lock.sh` diawali `AGENT_LOCK_PID=$PPID` di panggilan Bash yang sama.
 
 **Alur** (`--batch` default; terpisah dari `--solo`/`--tim`):
 - **`--batch`:** semua tiket satu batch: satu rencana, satu branch batch, **satu rangkaian staging** (apply 1 + verifikasi + apply 2 dari branch batch). Titik tunggu di langkah 9 dan 12.
@@ -30,7 +30,7 @@ flowchart TD
 
 ## Langkah
 0. **Guard:** kenali domain (`rules.md` → Workspace & worktree). Root project atau tidak ketemu → berhenti: "Jalankan dari workspace domain". Tentukan checkout domain, kunci `checkout:<path>`. Branch batch (`--batch`) = branch checkout domain (lokal saja, **tidak pernah** di-push).
-1. **Prasyarat (sekali):** Atlassian MCP terjangkau; `jira-transitions.json` punya id **Ready To Review**; `ansible-inventories.json` punya entri repo (`infra.md` → Setup inventory); password Vault staging ditemukan (`credentials.md`; tidak ada → berhenti & tanya); `ansible-playbook` dan `ansible-lint` tersedia (`--version`); Molecule dicatat ada/tidak. **Sinkron sumber** sama dengan `/validate-tiket` langkah 4; catat ref.
+1. **Prasyarat (sekali):** platform tiket siap (`ticket-platform.md` → Cek pertama; memory **none** → tanya user dulu); `ticket-transitions.json` punya id **Ready To Review**; `ansible-inventories.json` punya entri repo (`infra.md` → Setup inventory); password Vault staging ditemukan (`credentials.md`; tidak ada → berhenti & tanya); `ansible-playbook` dan `ansible-lint` tersedia (`--version`); Molecule dicatat ada/tidak. **Sinkron sumber** sama dengan `/validate-tiket` langkah 4; catat ref.
 2. **`/gate-validation`:** baca tiket + komentar + terkait/blocking; jenis tiket → `<base>` (`rules.md`). Cari laporan validasi terbaru (baris pertama komentar = link) dan **baca**:
    | Kondisi | Tindakan |
    |---|---|
@@ -38,7 +38,7 @@ flowchart TD
    | **Tidak layak** | Berhenti & tanya |
    | **Layak dengan catatan** | Tiap catatan jadi TC atau tugas |
    | **Layak** | Lanjut |
-   **Jejak pengerjaan** (deteksi seperti `/validate-tiket` langkah 3): wajib baca komentar review manusia (PR/MR + Jira) sejak putaran terakhir → daftar **Yang ditolak**. PR/MR merged → branch `<jenis>/<KODE>-r<n>` + Draft baru yang menyebut yang lama.
+   **Jejak pengerjaan** (deteksi seperti `/validate-tiket` langkah 3): wajib baca komentar review manusia (PR/MR + tiket) sejak putaran terakhir → daftar **Yang ditolak**. PR/MR merged → branch `<jenis>/<KODE>-r<n>` + Draft baru yang menyebut yang lama.
    **Acuan tiket** = link/path + ref: laporan validasi, runbook dan ADR terkait, inventory + `group_vars` yang tersentuh, role terkait. Dokumen berubah sejak validasi dan menyentuh AC → sebut bedanya, tanya user.
 3. **`/setup-worktree` + Peta host** (sebelum rencana):
    - **Mode:** `--solo`/`--tim` memaksa; tanpa flag → 1 tiket kecil = solo, selain itu tim.
@@ -69,8 +69,8 @@ flowchart TD
 12. **Putuskan selesai** per tiket hanya bila: runbook cocok, semua TC **Lulus** atau **Tertahan** beralasan, review tanpa temuan wajib, run 2 `changed=0`, persetujuan tercatat. `--batch`: perbaikan dikumpulkan lalu satu rangkaian staging ulang; tiket macet dikeluarkan dari batch dan dilaporkan.
 13. **Laporan:** SPV menulis `docs/tickets/<KODE>/uji.md` di worktree tiket (`report-format.md` → Laporan uji; keluaran disaring `redact.sh`), commit `docs: <KODE> laporan uji`.
 14. **`/open-pr` (Release):** `git push origin <branch tiket>`, perbarui isi Draft PR/MR (`release.md` → PR/MR tiket), tandai siap (`gh pr ready <n>` / `glab mr update <n> --ready`).
-15. **`/post-summary` (Release):** komentar Jira: baris pertama link `uji.md`, lalu runbook, PR/MR, persetujuan, catatan bahwa production diterapkan manusia/pipeline saat rilis.
-16. **`/move-ticket` (Release):** `transitionJiraIssue` ke Ready To Review. Tidak pernah Done.
+15. **`/post-summary` (Release):** komentar tiket: baris pertama link `uji.md`, lalu runbook, PR/MR, persetujuan, catatan bahwa production diterapkan manusia/pipeline saat rilis.
+16. **`/move-ticket` (Release):** **geser status** ke Ready To Review. Tidak pernah Done.
 17. **Bersihkan & ringkas:** hapus worktree tiket buatan batch ini yang sudah Ready To Review (syarat `rules.md`), `molecule destroy` untuk scenario yang dipakai, hentikan semua teammate, pastikan semua kunci (`staging:*`, `checkout:*`, `human-*`) dilepas.
 
    | KODE | Status | Runbook | Laporan uji | PR/MR |

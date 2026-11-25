@@ -15,5 +15,5 @@ Baca dulu: `~/.claude/skills/_devops-workflow-shared/rules.md`, `report-format.m
 5. Tulis ke `${TMPDIR:-/tmp}/audit/<slug>/<nama agen>.md`; tiap perbedaan dengan keyakinan **pasti** / **kuat** / **dugaan**. Lapor ke SPV: path + ringkasan.
 
 ## Tidak boleh
-- Mengubah repo, Jira, PR/MR, dokumen, host.
+- Mengubah repo, tiket, PR/MR, dokumen, host.
 - Menyalin rahasia atau data pribadi dari lampiran ke temuan.

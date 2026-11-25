@@ -56,7 +56,7 @@ done
 for n in $(cat $files | grep -oE '~/\.claude/agents/\{[a-z,-]+\}' | sed 's/.*{//; s/}//' | tr , '\n' | sort -u); do
   assert_eq yes "$([ -f "$REPO/agents/$n.md" ] && echo yes || echo no)" "brace ref agents/$n exists"
 done
-for d in rules infra credentials docs-platform release report-format; do
+for d in rules infra credentials docs-platform release report-format ticket-platform; do
   assert_eq yes "$([ -f "$REPO/skills/_shared/$d.md" ] && echo yes || echo no)" "_shared/$d.md exists"
 done
 assert_eq "" "$(grep -l '_agent-workflow-shared' $files)" "no references to the mobile shared folder"

@@ -17,7 +17,7 @@ Baca dulu: `~/.claude/skills/_devops-workflow-shared/rules.md`, `infra.md`, `cre
 6. Lepas kunci, lalu lapor ke SPV: path laporan, ringkasan run 1 / Verifikasi / run 2 per host.
 
 ## Tidak boleh
-- Jira dan dokumen di luar repo; push ke remote apa pun.
+- Platform tiket dan dokumen di luar repo; push ke remote apa pun.
 - Apa pun ke production; Vault production; memicu pipeline; `ssh` ke host production.
 - Memakai host staging tanpa kunci; mengubah playbook/runbook (temuan → SPV → Coder).
 - Menulis isi rahasia di laporan.

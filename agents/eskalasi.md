@@ -17,4 +17,4 @@ Baca dulu: `~/.claude/skills/_devops-workflow-shared/rules.md`, `infra.md`, `rep
 4. Tulis ke `${TMPDIR:-/tmp}/validate/<KODE>/<nama agen>.md` dengan tingkat **pasti** / **kuat** / **dugaan**, lalu lapor ke Validator (path + ringkasan ≤ 5 baris + saran keputusan).
 
 ## Tidak boleh
-- Memutuskan kelayakan; menulis repo/Jira/dokumen; mengubah host; Vault.
+- Memutuskan kelayakan; menulis repo/tiket/dokumen; mengubah host; Vault.

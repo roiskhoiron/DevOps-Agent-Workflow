@@ -15,7 +15,7 @@ Dokumen disimpan di folder `docs/` di repo infrastruktur, sebagai Markdown, **ke
 Folder belum ada → dibuat oleh commit pertama yang membutuhkannya (tanpa bertanya). `templates/runbook.md` dan `templates/adr.md` di repo workflow adalah kerangkanya.
 
 ## Menerbitkan laporan (platform `repo`)
-Laporan butuh link untuk baris pertama komentar Jira. Di platform `repo`, link = URL file di branch fork (`origin`), mis. `https://github.com/<fork>/<repo>/blob/<branch>/docs/tickets/OPS-12/validasi.md` (GitLab: `/-/blob/`). Host dari `git remote get-url origin`.
+Laporan butuh link untuk baris pertama komentar tiket. Di platform `repo`, link = URL file di branch fork (`origin`), mis. `https://github.com/<fork>/<repo>/blob/<branch>/docs/tickets/OPS-12/validasi.md` (GitLab: `/-/blob/`). Host dari `git remote get-url origin`.
 
 | Laporan | Branch | Catatan |
 |---|---|---|
@@ -27,7 +27,7 @@ Laporan butuh link untuk baris pertama komentar Jira. Di platform `repo`, link =
 Gambar/lampiran (screenshot dashboard) disimpan di folder yang sama dengan laporannya dan ditautkan relatif.
 
 ## Platform lain (dari memory project)
-- **Claude Docs**: laporan dibuat dengan `mcp__claude_ai_Claude_Docs__batch` (judul sama dengan judul laporan), link dokumen di baris pertama komentar Jira. Runbook tetap di repo; dokumen Claude Docs menautkannya.
+- **Claude Docs**: laporan dibuat dengan `mcp__claude_ai_Claude_Docs__batch` (judul sama dengan judul laporan), link dokumen di baris pertama komentar tiket. Runbook tetap di repo; dokumen Claude Docs menautkannya.
 - **Lainnya** (Confluence, wiki internal): ikuti cara terbit yang dicatat di memory project; tidak ada caranya → tanya user sekali, simpan.
 
 ## Runbook

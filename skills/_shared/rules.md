@@ -11,17 +11,18 @@ Dua prinsip yang membedakan workflow DevOps dari role lain:
 - Skrip: `$AGENT_WORKFLOW_DIR/bin/<skrip>`. Jika `AGENT_WORKFLOW_DIR` kosong, isi dengan folder repo:
   `export AGENT_WORKFLOW_DIR="$(cd "$(readlink ~/.claude/skills/_devops-workflow-shared)/../.." && pwd -P)"`
   Tiap panggilan Bash = shell baru: ulangi export ini di awal panggilan yang memakai skrip.
-- State lokal (bukan di repo): `${AGENT_WORKFLOW_STATE:-$HOME/.agent-workflow}/` — `jira-transitions.json`, `ansible-inventories.json`, kunci (`locks/`), log run (`runs/`).
+- State lokal (bukan di repo): `${AGENT_WORKFLOW_STATE:-$HOME/.agent-workflow}/` — `ticket-transitions.json`, `ansible-inventories.json`, kunci (`locks/`), log run (`runs/`).
 - **Lokasi khusus project tidak pernah ditulis di konfigurasi global** (agen, skill, rules, guard, CLAUDE.md global). Agen membaca memory project Claude Code (`MEMORY.md` project) dan `## Catatan agen` di `CLAUDE.md` project. Belum ada → tanya user sekali (dengan satu saran), simpan sebagai memory project tipe `reference`, lalu pakai. Berubah/tidak ditemukan → perbarui setelah bertanya. Isi memory project DevOps:
 
   | Kunci | Isi | Contoh saran saat bertanya |
   |---|---|---|
+  | Platform tiket | **none** sampai user memilih: `jira`, `github`, `gitlab`, atau `manual` + lokasi + prefix KODE (`ticket-platform.md`) | host `git remote get-url origin` |
   | Repo infrastruktur | repo + remote fork (`origin`) dan utama (`upstream`) | `git remote -v` |
   | Branch project | `<primary>` = branch production, `<protected>` = branch integrasi; strategi merge PR tiket (squash / merge commit) | `git ls-remote --symref upstream HEAD`, `git branch -r` |
   | Inventory | path inventory staging dan production di repo; nama grup penting | folder `inventories/*`, `ansible.cfg` |
   | Vault | vault id staging + path file password staging (tidak pernah production) | `ansible.cfg` `vault_identity_list` |
   | Platform dokumentasi | `repo` (default: folder `docs/`), atau platform lain + lokasinya | `docs-platform.md` |
-  | Pemilik DevOps | nama orang yang menyetujui tiap tiket (`/request-approval`) dan sapaan tim untuknya | komentar Jira lama |
+  | Pemilik DevOps | nama orang yang menyetujui tiap tiket (`/request-approval`) dan sapaan tim untuknya | komentar tiket lama |
   | Pelaksana production | siapa/apa yang menerapkan ke production: nama orang, atau pipeline (nama job/file) | `.gitlab-ci.yml`, `.github/workflows/` |
   | Sumber log & monitoring | log layanan (path, journald unit), dashboard, endpoint health untuk `/read-logs` dan `/verify-live` | runbook lama |
   | Uji role | apakah role memakai Molecule (driver, scenario) | `roles/*/molecule/` |
@@ -33,19 +34,19 @@ Dua prinsip yang membedakan workflow DevOps dari role lain:
 | Agen | Model (`--model`) | Tugas | Tidak boleh |
 |---|---|---|---|
 | SPV | opus (`claude-opus-5-5`) | bagi tugas, jatah host staging, putuskan selesai, minta persetujuan pemilik DevOps | menulis playbook/runbook |
-| Planner | fable (`claude-fable-5-2`) | rencana + test case tiket mode tim, analisis eskalasi; atas panggilan SPV | menulis repo, Jira, staging, memerintah agen lain |
+| Planner | fable (`claude-fable-5-2`) | rencana + test case tiket mode tim, analisis eskalasi; atas panggilan SPV | menulis repo, tiket, staging, memerintah agen lain |
 | Validator | opus (`claude-opus-5-5`) | `/validate-tiket`; mode tim = SPV validasi | menulis playbook/runbook |
-| HoE | opus (`claude-opus-5-5`) | `/validate-tiket --tim`: repo infrastruktur vs dokumen (runbook, ADR, inventory), dampak ke host | menulis repo/Jira/dokumen |
-| Spesialis eskalasi | fable (`claude-fable-5-2`), on-demand | `/validate-tiket --tim`: hanya saat pemicu eskalasi | menulis repo/Jira/dokumen, memutuskan |
-| PjM | sonnet (`claude-sonnet-5-5`) | `/validate-tiket --tim`: tiket terkait/blocking, PR/MR terbuka, kunci staging, risiko bentrok | menulis Jira/PR/dokumen |
+| HoE | opus (`claude-opus-5-5`) | `/validate-tiket --tim`: repo infrastruktur vs dokumen (runbook, ADR, inventory), dampak ke host | menulis repo/tiket/dokumen |
+| Spesialis eskalasi | fable (`claude-fable-5-2`), on-demand | `/validate-tiket --tim`: hanya saat pemicu eskalasi | menulis repo/tiket/dokumen, memutuskan |
+| PjM | sonnet (`claude-sonnet-5-5`) | `/validate-tiket --tim`: tiket terkait/blocking, PR/MR terbuka, kunci staging, risiko bentrok | menulis tiket/PR/dokumen |
 | Reviewer | opus (`claude-opus-5-5`) | runbook ↔ playbook, keamanan + idempotensi, lalu logika vs AC; review ditulis di PR/MR | review kode sendiri |
 | Release | haiku (`claude-haiku-5-5`) | Draft PR/MR, push, PR/MR siap review, komentar & geser tiket, merge PR tiket setelah audit, PR rilis, tag | Done, menerapkan ke production, merge PR rilis ke `<primary>` |
-| Coder | sonnet (`claude-sonnet-5-5`) | runbook lalu playbook/role, lint, check mode di staging, push rutin branch tiketnya | Jira, push selain branch tiketnya, force-push, apply ke staging |
-| QA | sonnet (`claude-sonnet-5-5`) | apply ke staging dua kali (idempotensi), langkah Verifikasi runbook, uji rollback bila diminta | Jira, push, production |
-| Auditor | opus (`claude-opus-5-5`) | `/audit-issue`: repo, riwayat git, log, fakta host (baca saja) | menulis repo/Jira/server |
-| Analis | opus (`claude-opus-5-5`) | `/audit-issue`: lampiran (diagram, PDF, log terlampir) | menulis repo/Jira/server |
+| Coder | sonnet (`claude-sonnet-5-5`) | runbook lalu playbook/role, lint, check mode di staging, push rutin branch tiketnya | menulis tiket, push selain branch tiketnya, force-push, apply ke staging |
+| QA | sonnet (`claude-sonnet-5-5`) | apply ke staging dua kali (idempotensi), langkah Verifikasi runbook, uji rollback bila diminta | menulis tiket, push, production |
+| Auditor | opus (`claude-opus-5-5`) | `/audit-issue`: repo, riwayat git, log, fakta host (baca saja) | menulis repo/tiket/server |
+| Analis | opus (`claude-opus-5-5`) | `/audit-issue`: lampiran (diagram, PDF, log terlampir) | menulis repo/tiket/server |
 
-Management (SPV, Planner, Validator, Reviewer, Release) memutuskan dan berbicara ke luar: Jira, dokumen, git remote. Development (Coder, QA) hanya repo dan host staging; akses remote Coder = push branch tiketnya sendiri ke `origin`. Planner hanya penasihat SPV. Tim validasi (HoE, PjM, Spesialis eskalasi) hanya-baca dan melapor ke Validator. Housekeeping = skrip shell, tanpa agen. Model diubah di `~/.claude/agents/<peran>.md`.
+Management (SPV, Planner, Validator, Reviewer, Release) memutuskan dan berbicara ke luar: platform tiket, dokumen, git remote. Development (Coder, QA) hanya repo dan host staging; akses remote Coder = push branch tiketnya sendiri ke `origin`. Planner hanya penasihat SPV. Tim validasi (HoE, PjM, Spesialis eskalasi) hanya-baca dan melapor ke Validator. Housekeeping = skrip shell, tanpa agen. Model diubah di `~/.claude/agents/<peran>.md`.
 
 ## Mode kerja
 - **Diawasi**: sesi biasa, user menyetujui izin.
@@ -60,11 +61,11 @@ Management (SPV, Planner, Validator, Reviewer, Release) memutuskan dan berbicara
 - `git push` ke remote selain `origin` (fork), termasuk `--tags` dan hapus branch. Pengecualian: tag versi `vX.Y.Z` eksplisit (tanpa force/hapus) ke `origin` dan `upstream`.
 - Force-push atau hapus `master`/`main`/`develop`.
 - `rm -r` di luar folder project. Pengecualian: cache uji (`.molecule`, `.tox`, `.cache`, `__pycache__`, `.ansible`) di worktree lain repo yang sama; isi `/tmp/qa/` dan `/tmp/validate/`.
-- Memindah tiket Jira ke status yang tidak ada di `jira-transitions.json` (Done tidak pernah ada di sana).
+- Memindah tiket ke status yang tidak ada di `ticket-transitions.json` (Done tidak pernah ada di sana), menutup issue (`gh/glab issue close`), label status di luar daftar, mengubah status lewat `gh/glab api`, dan `Closes/Fixes #<n>` di PR/MR (`ticket-platform.md`).
 - Edit/Write file di worktree primary bila repo punya worktree tambahan.
 - Membuka terminal/agen sendiri atau membuat project/workspace Orca baru (lihat Orkestrasi).
 - `git worktree add` di luar folder sejajar checkout; `git worktree remove` selain `<repo>-<nomor>` dan `<repo>-rilis-vX.Y.Z`, atau dengan `--force`; `git worktree move`.
-- Mode audit: semua penulisan ke repo, git remote, Jira, staging (playbook selain `--syntax-check`/`--list-*`, ad-hoc selain modul baca, `ansible-vault`, `molecule`).
+- Mode audit: semua penulisan ke repo, git remote, tiket, staging (playbook selain `--syntax-check`/`--list-*`, ad-hoc selain modul baca, `ansible-vault`, `molecule`).
 
 **Tidak ditangkap guard, jadi tanggung jawab agen:** wrapper yang memanggil ansible (`make deploy`, `./deploy.sh`), `ssh`/`scp` langsung ke host, tulis lewat shell (`sed -i`, `>`). Aturannya: **panggil `ansible-playbook` langsung** (bukan lewat wrapper) supaya guard bisa memeriksa; **tidak pernah `ssh` ke host production**; ke host staging hanya untuk perintah baca (log, status) saat memegang kuncinya.
 
@@ -75,7 +76,7 @@ Jangan mencari jalan memutar. Jika diblokir, laporkan pesannya ke SPV/user.
 2. Sebelum memulai hotfix (sementara manual).
 3. Kredensial tidak ditemukan (vault password staging, kunci SSH staging).
 4. Staging tidak cocok dengan dokumen/inventory sehingga uji tidak bermakna (host hilang, drift besar).
-5. Host staging dikunci tiket Jira lain: tunggu, atau tanya user mana yang didahulukan.
+5. Host staging dikunci tiket lain: tunggu, atau tanya user mana yang didahulukan.
 6. Dua fix hotfix bentrok (mode tim: SPV minta analisis opsi dari Planner dulu, lalu tanya).
 7. Persetujuan pemilik DevOps (`/request-approval`) sebelum PR/MR ditandai siap review: selalu menunggu jawaban manusia.
 
@@ -136,18 +137,8 @@ Contoh: `Maman-Programmer1`, `Paijo-QA1`. Owner kunci tetap `<KODE>-<peran><n>` 
 - Push: Coder hanya branch tiketnya; Validator hanya branch tiket untuk laporan validasi (`docs-platform.md`); sisanya Release. Branch hanya ke `origin`; tag versi ke `upstream` dan `origin`.
 - Tag versi `vX.Y.Z` (beranotasi) dibuat Release setelah PR rilis di-merge manusia, diterapkan ke production, dan `/verify-live` lulus. Tag tidak pernah di-force atau dihapus.
 
-## Setup transisi Jira (sekali per project)
-Hook menolak transisi sebelum project punya daftar. Jika ditolak "belum punya daftar transisi":
-1. `mcp__claude_ai_Atlassian__getTransitionsForJiraIssue` pada satu tiket project itu.
-2. Tunjukkan tabel `id → nama status` ke user.
-3. User memilih id untuk **Todo**, **In Progress**, dan **Ready To Review** (jangan pernah Done).
-4. Tulis lewat Bash (bukan Edit/Write), gabungkan dengan isi lama:
-```bash
-S=${AGENT_WORKFLOW_STATE:-$HOME/.agent-workflow}; F="$S/jira-transitions.json"
-mkdir -p "$S" && { [ -s "$F" ] || echo '{}' > "$F"; } &&
-jq '. + {"OPS":{"allow":["11","21","31"],"names":{"11":"Todo","21":"In Progress","31":"Ready To Review"}}}' "$F" > "$F.tmp" && mv "$F.tmp" "$F"
-```
-Pemindahan tiket: `mcp__claude_ai_Atlassian__transitionJiraIssue` dengan id dari file itu.
+## Platform tiket dan status (sekali per project)
+Tidak ada platform tiket default. Sebelum perintah apa pun membaca tiket, cek memory project → **Platform tiket**; nilainya **none** → berhenti dan tanya user (Jira / GitHub Issues + Projects / GitLab Issues + board / manual; ragu → saran sesuai host repo). Cara bertanya, operasi per platform (**cek akses**, **baca tiket**, **cari tiket**, **komentar tiket**, **geser status**), format KODE, dan "Setup status" untuk guard: `ticket-platform.md`. Status yang boleh dipindah agen hanya Todo, In Progress, Ready To Review; Done dan menutup tiket selalu manusia.
 
-## Gaya tulis (laporan, komentar Jira, pertanyaan)
-Bahasa Indonesia, singkat padat, ramah pemula; tabel dan diagram mermaid lebih dulu daripada paragraf. Komentar Jira: humanis, orang pertama "aku", sapaan ramah, baris pertama memuat link laporan. Detail format: `report-format.md`. Kredensial dan nilai rahasia tidak pernah ditulis ke dokumen, Jira, atau PR/MR; keluaran ansible selalu lewat `redact.sh` dulu.
+## Gaya tulis (laporan, komentar tiket, pertanyaan)
+Bahasa Indonesia, singkat padat, ramah pemula; tabel dan diagram mermaid lebih dulu daripada paragraf. Komentar tiket: humanis, orang pertama "aku", sapaan ramah, baris pertama memuat link laporan. Detail format: `report-format.md`. Kredensial dan nilai rahasia tidak pernah ditulis ke dokumen, tiket, atau PR/MR; keluaran ansible selalu lewat `redact.sh` dulu.

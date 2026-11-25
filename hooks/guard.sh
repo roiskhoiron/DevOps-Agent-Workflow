@@ -510,8 +510,8 @@ check_Bash() {
           esac;;
         git) GSUB_OFF=-1; check_git "${w[@]:$((i+1))}"; gsub=$((i + 1 + GSUB_OFF));;
         orca) check_orca "${w[@]:$((i+1))}";;
-        gh) check_deploy gh "${w[@]:$((i+1))}";;
-        glab) check_deploy glab "${w[@]:$((i+1))}"; [ -n "$AUDIT" ] && check_forge "${w[@]:$((i+1))}";;
+        gh) check_deploy gh "${w[@]:$((i+1))}"; check_ticket_cli gh "${w[@]:$((i+1))}";;
+        glab) check_deploy glab "${w[@]:$((i+1))}"; check_ticket_cli glab "${w[@]:$((i+1))}"; [ -n "$AUDIT" ] && check_forge "${w[@]:$((i+1))}";;
         rm) [ $i -eq $gsub ] || check_rm "${w[@]:$((i+1))}";;
         ANSIBLE_INVENTORY=*) envinv=${w[$i]#*=};;
         ANSIBLE_VAULT_PASSWORD_FILE=*|ANSIBLE_VAULT_IDENTITY_LIST=*) envvault+=("${w[$i]#*=}");;
@@ -555,16 +555,97 @@ check_edit() {
   return 0
 }
 
-# transitionJiraIssue: only transition ids allowed for the project in ${STATE}/jira-transitions.json
+# --- ticket platform (skills/_shared/ticket-platform.md): Done is for humans only ---
+TT=$STATE/ticket-transitions.json
+done_block() { block "$1 dilarang: Done / menutup tiket hanya oleh manusia. Geser hanya ke Todo, In Progress, atau Ready To Review (ticket-platform.md)."; }
+
+# Jira transitionJiraIssue: id must be allowed for jira:<PROJ> (fallback: Mobile-format jira-transitions.json)
 check_jira() {
-  local cfg=$STATE/jira-transitions.json key id proj
+  local key id proj legacy=$STATE/jira-transitions.json
   key=$(printf '%s' "$input" | "$JQ" -r '.tool_input.issueIdOrKey // empty' 2>/dev/null)
   id=$(printf '%s' "$input" | "$JQ" -r '.tool_input.transition.id // empty' 2>/dev/null)
   proj=$(printf '%s' "$key" | sed -E 's/-[0-9]+$//')
-  "$JQ" -e type "$cfg" >/dev/null 2>&1 || block "config transisi Jira tidak ada/rusak ($cfg). Minta user: jalankan setup transisi."
-  "$JQ" -e --arg p "$proj" 'has($p)' "$cfg" >/dev/null 2>&1 || block "project '$proj' belum punya daftar transisi. Minta user: jalankan setup transisi."
-  "$JQ" -e --arg p "$proj" --arg i "$id" '.[$p].allow // [] | map(tostring) | index($i) != null' "$cfg" >/dev/null 2>&1 ||
-    block "transisi id '$id' untuk $proj tidak diizinkan. Done hanya dipindah kolega; pindahkan hanya ke status yang ada di daftar allow."
+  if "$JQ" -e --arg p "jira:$proj" 'has($p)' "$TT" >/dev/null 2>&1; then
+    "$JQ" -e --arg p "jira:$proj" --arg i "$id" '.[$p].allow // [] | map(tostring) | index($i) != null' "$TT" >/dev/null 2>&1 && return 0
+  elif "$JQ" -e --arg p "$proj" 'has($p)' "$legacy" >/dev/null 2>&1; then
+    "$JQ" -e --arg p "$proj" --arg i "$id" '.[$p].allow // [] | map(tostring) | index($i) != null' "$legacy" >/dev/null 2>&1 && return 0
+  else
+    block "project '$proj' belum punya daftar status ($TT). Minta user: jalankan 'Setup status' (ticket-platform.md)."
+  fi
+  done_block "transisi id '$id' untuk $proj"
+}
+
+# status labels (status: / status::) must be in the allow list of a label-mode entry
+check_labels() { # comma-separated label lists...
+  local l a ls entries pre allow found best
+  entries=$("$JQ" -r 'to_entries[] | select(.value.label_prefix) | "\(.value.label_prefix)\t\(.value.allow // [] | join(","))"' "$TT" 2>/dev/null)
+  for a; do
+    IFS=, read -ra ls <<< "$a"
+    for l in ${ls[@]+"${ls[@]}"}; do
+      l=${l# }; found='' best=0
+      while IFS=$'\t' read -r pre allow; do  # the longest matching prefix decides (status: vs status::)
+        [ -n "$pre" ] && case $l in "$pre"*) [ ${#pre} -gt $best ] && best=${#pre};; esac
+      done <<< "$entries"
+      while IFS=$'\t' read -r pre allow; do
+        [ -n "$pre" ] && [ ${#pre} -eq $best ] || continue
+        case $l in "$pre"*) found=1; [[ ",$allow," == *",$l,"* ]] && { found=ok; break; };; esac
+      done <<< "$entries"
+      [ "$found" = 1 ] && done_block "label status '$l'"
+      if [ -z "$found" ]; then case $l in status:*) block "label status '$l' belum dikenal: jalankan 'Setup status' (ticket-platform.md) dulu.";; esac; fi
+    done
+  done
+}
+
+# "Closes #12" in a PR/MR closes the issue on merge = Done without a human
+closes_kw() {
+  grep -Eiq '(^|[^a-z])(close[sd]?|fix(e[sd])?|resolve[sd]?)[[:space:]:]+([a-z0-9_.-]+/[a-z0-9_.-]+)?#[0-9]+' &&
+    block "kata 'Closes/Fixes/Resolves #<n>' di PR/MR dilarang: issue tertutup otomatis saat merge (Done = manusia). Pakai 'Refs #<n>'."
+  return 0
+}
+
+# gh/glab writes to issues, project boards, and API mutations
+check_ticket_cli() { # tool args...
+  local t=$1 a f prev='' pid='' opt='' labels=()
+  shift
+  if [ -n "$AUDIT" ]; then
+    case "${1:-} ${2:-}" in
+      'issue view'|'issue list'|'issue status'|'project view'|'project list'|'project item-list'|'project field-list'|issue\ |project\ ) ;;
+      issue\ *|project\ *) audit_block "$t $1 $2";;
+    esac
+  fi
+  case "${1:-} ${2:-}" in
+    'issue close'|'issue delete'|'project item-delete'|'project item-archive'|'project delete'|'project close') done_block "$t $1 $2";;
+    'issue edit'|'issue update')
+      for a in "${@:3}"; do
+        case $prev in --add-label|--label|-l) labels+=("$a");; esac
+        case $a in --add-label=*|--label=*) labels+=("${a#*=}");; esac
+        prev=$a
+      done
+      check_labels ${labels[@]+"${labels[@]}"};;
+    'project item-edit')
+      for a in "${@:3}"; do
+        case $prev in --project-id) pid=$a;; --single-select-option-id) opt=$a;; esac
+        case $a in --project-id=*) pid=${a#*=};; --single-select-option-id=*) opt=${a#*=};; --clear) done_block "$t project item-edit --clear";; esac
+        prev=$a
+      done
+      [ -n "$opt" ] || return 0   # text/number/date fields are not the status
+      "$JQ" -e --arg p "github:$pid" 'has($p)' "$TT" >/dev/null 2>&1 ||
+        block "Project '$pid' belum punya daftar status ($TT). Minta user: jalankan 'Setup status' (ticket-platform.md)."
+      "$JQ" -e --arg p "github:$pid" --arg o "$opt" '.[$p].allow // [] | index($o) != null' "$TT" >/dev/null 2>&1 || done_block "opsi status '$opt'";;
+    'pr create'|'pr edit'|'mr create'|'mr update'|'pr merge'|'mr merge')
+      for a in "${@:3}"; do
+        case $prev in --body-file|-F) [ -f "$(join_path "$a" "$wd")" ] && closes_kw < "$(join_path "$a" "$wd")";; esac
+        case $a in --body-file=*) f=$(join_path "${a#*=}" "$wd"); [ -f "$f" ] && closes_kw < "$f";; esac
+        closes_kw <<< "$a"   # here-string, not a pipe: block must exit this shell
+        prev=$a
+      done;;
+    api\ *)
+      for a in "${@:2}"; do
+        case $a in *updateProjectV2ItemFieldValue*|*clearProjectV2ItemFieldValue*|*closeIssue*|*deleteIssue*|*deleteProjectV2Item*|*state_event=close*|state=closed)
+          block "$t api untuk mengubah status/menutup tiket dilarang: pakai perintah di ticket-platform.md → Operasi (guard memeriksanya).";; esac
+      done;;
+  esac
+  return 0
 }
 
 input=$(cat)

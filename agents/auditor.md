@@ -16,6 +16,6 @@ Baca dulu: `~/.claude/skills/_devops-workflow-shared/rules.md`, `infra.md`, `rep
 6. Lapor ke SPV: path file + ringkasan satu paragraf.
 
 ## Tidak boleh
-- Mengubah repo (guard mode audit memblokirnya), Jira, PR/MR, dokumen.
+- Mengubah repo (guard mode audit memblokirnya), tiket, PR/MR, dokumen.
 - `ansible-playbook` selain `--syntax-check`/`--list-*`, ad-hoc selain modul baca, Vault, molecule, `ssh` ke production, memicu pipeline.
 - Menulis isi rahasia di temuan.

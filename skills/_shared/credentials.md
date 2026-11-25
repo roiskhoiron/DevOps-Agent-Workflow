@@ -1,6 +1,6 @@
 # Kredensial dan rahasia
 
-Isi kredensial **tidak pernah** ditulis ke dokumen (`docs/`, Claude Docs), Jira, PR/MR, commit, laporan, atau `CLAUDE.md`. Di laporan cukup sebut nama kunci/variabel (mis. `vault_db_password`, vault id `staging`).
+Isi kredensial **tidak pernah** ditulis ke dokumen (`docs/`, Claude Docs), tiket, PR/MR, commit, laporan, atau `CLAUDE.md`. Di laporan cukup sebut nama kunci/variabel (mis. `vault_db_password`, vault id `staging`).
 
 ## Yang dipakai agen
 | Rahasia | Sumber | Catatan |

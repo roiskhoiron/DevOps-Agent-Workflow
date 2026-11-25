@@ -1,11 +1,11 @@
 ---
 name: audit-issue
-description: Audit terperinci sebuah keluhan atau pertanyaan infrastruktur yang belum menjadi tiket Jira (repo, riwayat git, log layanan, fakta host baca saja, lampiran), hanya-baca, hasilnya satu laporan dengan saran tiket Jira. Dipanggil lewat `/audit-issue "<teks>" [--solo|--tim] [lampiran...]`. Use when asked to audit an infrastructure issue, outage complaint, or question without a Jira ticket; kata kunci - audit issue, audit masalah, telusuri keluhan.
+description: Audit terperinci sebuah keluhan atau pertanyaan infrastruktur yang belum menjadi tiket (repo, riwayat git, log layanan, fakta host baca saja, lampiran), hanya-baca, hasilnya satu laporan dengan saran tiket. Dipanggil lewat `/audit-issue "<teks>" [--solo|--tim] [lampiran...]`. Use when asked to audit an infrastructure issue, outage complaint, or question without a ticket; kata kunci - audit issue, audit masalah, telusuri keluhan.
 argument-hint: "\"<teks permintaan>\" [--solo|--tim] [lampiran...]"
 ---
-Audit permintaan di `$ARGUMENTS`: teks dalam tanda kutip, flag `--solo`/`--tim` (opsional), lalu path/link lampiran. Peranmu = **SPV audit**. Audit **hanya-baca**: tidak mengubah repo, Jira, atau host; tidak menjalankan playbook. Guard memaksanya selama mode audit menyala.
+Audit permintaan di `$ARGUMENTS`: teks dalam tanda kutip, flag `--solo`/`--tim` (opsional), lalu path/link lampiran. Peranmu = **SPV audit**. Audit **hanya-baca**: tidak mengubah repo, tiket, atau host; tidak menjalankan playbook. Guard memaksanya selama mode audit menyala.
 
-Baca dulu (jangan disalin ke sini): `~/.claude/skills/_devops-workflow-shared/rules.md`, `infra.md`, `credentials.md`, `report-format.md` (→ Laporan audit), `docs-platform.md`, dan `~/.claude/agents/auditor.md`, `~/.claude/agents/analis.md`. Skill set khas: `~/.claude/skills/{read-logs,inventory-check}/SKILL.md`.
+Baca dulu (jangan disalin ke sini): `~/.claude/skills/_devops-workflow-shared/rules.md`, `ticket-platform.md`, `infra.md`, `credentials.md`, `report-format.md` (→ Laporan audit), `docs-platform.md`, dan `~/.claude/agents/auditor.md`, `~/.claude/agents/analis.md`. Skill set khas: `~/.claude/skills/{read-logs,inventory-check}/SKILL.md`.
 
 **Model:** `claude-opus-5-5` untuk semua peran.
 
@@ -29,13 +29,13 @@ flowchart LR
 5. **`/read-logs`** (`~/.claude/skills/read-logs/SKILL.md`): log layanan dan log run sebelumnya (run lama di `~/.agent-workflow/runs/`, log job pipeline lewat `gh run view --log` / `glab ci view` bila boleh dibaca), di sekitar waktu kejadian. Production hanya lewat sumber log/monitoring dari memory project; tidak ada → "tidak bisa diperiksa".
 6. **`/inventory-check`:** inventory + variabel vs dokumen; fakta host lewat modul baca (`setup`, `service_facts`, `package_facts`, `stat`) di staging/production untuk membandingkan keadaan nyata dengan repo (drift).
 7. **Simpulkan:** gabungkan `${TMPDIR:-/tmp}/audit/<slug>/*.md`. Akar masalah + keyakinan (**pasti** / **kuat** / **dugaan**), dampak, ukuran perbaikan. Klaim tanpa bukti = dugaan.
-8. **`/write-report`:** isi semua bagian `laporan.md`, keluaran log/host lewat `redact.sh`, tambah saran tiket Jira (tidak dibuat).
+8. **`/write-report`:** isi semua bagian `laporan.md`, keluaran log/host lewat `redact.sh`, tambah saran tiket (tidak dibuat).
 9. **Bersihkan & ringkas:** hentikan semua teammate, lalu `AGENT_LOCK_PID=$PPID "$AGENT_WORKFLOW_DIR/bin/audit-mode.sh" off` sebagai panggilan Bash tersendiri. Di chat: path laporan + satu kalimat kesimpulan + tawaran: "simpan ke `docs/audit/<slug>.md` lewat PR docs?" Ya → worktree sementara sejajar checkout `git -C <checkout> worktree add ../<repo>-audit-<yyyymmddhhmm> -b docs/audit-<slug> upstream/<protected>`, salin laporan ke `docs/audit/<slug>.md`, commit, `git push -u origin docs/audit-<slug>`, Draft PR/MR ke `<protected>` (`docs-platform.md`), lalu `git worktree remove ../<repo>-audit-<yyyymmddhhmm>` (tanpa `--force`).
 
 ## Berhenti lebih awal / galat
 Sebelum berhenti: hentikan semua teammate, isi bagian laporan yang sudah ada temuannya dan tandai sisanya belum selesai, lalu `audit-mode.sh off`.
 
 ## Tidak pernah
-- Membuat, mengedit, mengomentari, atau memindah tiket Jira; menulis Confluence.
+- Membuat, mengedit, mengomentari, atau memindah tiket; menulis Confluence.
 - Commit, checkout, branch, worktree, PR/MR, edit file repo, atau menulis lewat shell (guard tidak menangkap `sed -i`/`>`) selama mode audit.
 - `ansible-playbook` selain `--syntax-check`/`--list-*`, ad-hoc selain modul baca, `ansible-vault`, `molecule`, `ssh` ke host production, memicu pipeline.

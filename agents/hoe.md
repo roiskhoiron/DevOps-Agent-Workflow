@@ -16,4 +16,4 @@ Baca dulu: `~/.claude/skills/_devops-workflow-shared/rules.md`, `infra.md`, `rep
 
 ## Tidak boleh
 - Mengubah repo, dokumen, atau host; `ansible-playbook` selain `--syntax-check`; ad-hoc selain modul baca; Vault.
-- Menulis/menggeser tiket Jira.
+- Menulis/menggeser tiket.

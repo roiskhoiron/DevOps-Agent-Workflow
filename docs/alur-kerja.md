@@ -1,6 +1,7 @@
 # Alur kerja
 
-## Papan kanban Jira
+## Papan kanban
+Papannya sama di platform apa pun (Jira, GitHub Projects, GitLab issue board, atau manual). Platform tidak punya default: agen menanyakannya saat pertama dipakai ([ticket-platform.md](../skills/_shared/ticket-platform.md)).
 Sama dengan workflow Mobile: Todo → In Progress → Ready To Review → Done. Kolom Done hanya disentuh manusia.
 
 | | To Do | In Progress | Ready To Review | Done |
@@ -8,7 +9,7 @@ Sama dengan workflow Mobile: Todo → In Progress → Ready To Review → Done. 
 | **Artinya** | Tiket baru, belum dicek | Layak dan sedang dikerjakan | Runbook + playbook lolos staging dan disetujui pemilik DevOps, menunggu review manusia | Diterima |
 | **Perintah** | `/validate-tiket` | `/develop-tiket` | `/rilis-tiket` (feedback) | `/rilis-tiket` (merge PR tiket), `/branch-manager --rilis` (rilis versi) |
 | **Pindah oleh** | manusia; atau agen (`/rilis-tiket`, izin user) bila ditolak | agen (Validator), bila **Layak** | agen (Release), setelah persetujuan pemilik DevOps | **manusia saja** |
-| **Bukti** | — | `docs/tickets/<KODE>/validasi.md` + komentar Jira | runbook, `uji.md`, PR/MR, komentar Jira | — |
+| **Bukti** | — | `docs/tickets/<KODE>/validasi.md` + komentar tiket | runbook, `uji.md`, PR/MR, komentar tiket | — |
 
 ```mermaid
 flowchart LR
@@ -53,7 +54,7 @@ flowchart TD
 2. Sinkron dokumen (`docs/runbooks`, `docs/adr`, inventory) dari `upstream/<protected>`.
 3. `/inventory-check`: permintaan vs inventory vs dokumen vs host nyata (modul baca saja). Bug → bukti dari `/read-logs`.
 4. `/find-related`: tiket/PR terkait, kunci staging.
-5. Laporan `docs/tickets/<KODE>/validasi.md` (di branch tiket, di-push ke fork), komentar Jira, In Progress bila layak.
+5. Laporan `docs/tickets/<KODE>/validasi.md` (di branch tiket, di-push ke fork), komentar tiket, In Progress bila layak.
 
 `--tim`: HoE (repo vs dokumen, dampak host), PjM (ketergantungan), Spesialis eskalasi (hanya saat pemicu).
 
@@ -65,7 +66,7 @@ flowchart TD
 | `--separate` | tiap tiket apply staging sendiri (tetap antre kunci staging) |
 | `--uat` | sesudah QA lulus, pemilik DevOps memeriksa sendiri hasil di staging; SPV memegang kunci `human-<KODE>` sampai kamu bilang "selesai UAT" |
 
-Urutan: gerbang validasi → worktree + **Peta host** → rencana + Draft PR/MR → **runbook** (dicocokkan SPV) → playbook → lint → check mode → review (runbook ↔ playbook, keamanan, idempotensi) → `risky-scan.sh` (berisiko → tanya kamu) → apply staging + Verifikasi → run kedua `changed=0` → **persetujuan pemilik DevOps** → `uji.md` → PR/MR siap → komentar Jira → Ready To Review.
+Urutan: gerbang validasi → worktree + **Peta host** → rencana + Draft PR/MR → **runbook** (dicocokkan SPV) → playbook → lint → check mode → review (runbook ↔ playbook, keamanan, idempotensi) → `risky-scan.sh` (berisiko → tanya kamu) → apply staging + Verifikasi → run kedua `changed=0` → **persetujuan pemilik DevOps** → `uji.md` → PR/MR siap → komentar tiket → Ready To Review.
 
 ## `/rilis-tiket`
 | Keadaan | Tindakan |

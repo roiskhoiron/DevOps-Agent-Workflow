@@ -1,6 +1,6 @@
 # DevOps-Agent-Workflow
 
-Tim agen AI (Claude Code) yang mengerjakan **tiket Jira infrastruktur** dari **Todo sampai Ready To Review**: mengecek tiket, menulis runbook, menulis playbook Ansible, mengujinya di staging, meminta persetujuan, lalu membuat PR/MR.
+Tim agen AI (Claude Code) yang mengerjakan **tiket infrastruktur** (di Jira, GitHub Projects, GitLab issue board, atau tanpa platform) dari **Todo sampai Ready To Review**: mengecek tiket, menulis runbook, menulis playbook Ansible, mengujinya di staging, meminta persetujuan, lalu membuat PR/MR.
 
 Kamu cukup mengetik satu perintah, misalnya `/develop-tiket OPS-1234`. Agen bekerja; kamu memeriksa hasil dan menyetujui.
 
@@ -60,8 +60,7 @@ pipx install molecule && pipx inject molecule "molecule-plugins[docker]"
 Kamu juga butuh **Claude Code**. Orca dan Docker opsional.
 
 **2. Sambungkan akun**
-- Di claude.ai, hubungkan konektor **Atlassian** (Jira).
-- Login CLI: `gh auth login` (GitHub) atau `glab auth login` (GitLab).
+- Login CLI repo: `gh auth login` (GitHub) atau `glab auth login` (GitLab).
 - Pastikan bisa SSH ke host **staging**. Akses production **tidak** dibutuhkan.
 
 **3. Pasang workflow ini**
@@ -73,11 +72,24 @@ bash ~/devops-agent-workflow/tests/run.sh    # harus keluar "ALL PASS"
 
 **4. (Opsional) Aktifkan mode tim.** Supaya tiap agen tampil di panel sendiri: jalankan `claude --teammate-mode auto`, atau ketik `/config` → **Teammate mode** → `auto`.
 
-**5. Jawab beberapa pertanyaan saat pertama dipakai.** Saat perintah pertama dijalankan di project baru, agen akan bertanya sekali saja lalu mengingatnya:
+**5. Jawab beberapa pertanyaan saat pertama dipakai.** Saat perintah pertama dijalankan di project baru, agen akan bertanya sekali saja lalu mengingatnya. **Pertanyaan pertama selalu soal platform tiket**, karena workflow ini tidak menganggap platform mana pun sebagai default:
+
+> *"Tiket untuk project ini dikelola di mana?"*
+
+| Pilihan | Yang perlu disiapkan |
+|---|---|
+| Jira | hubungkan konektor **Atlassian** di claude.ai |
+| GitHub Issues + GitHub Projects | `gh auth refresh -s project` (izin akses Projects) |
+| GitLab Issues + issue board | `glab auth login` |
+| Manual (tanpa platform) | tidak ada; tempel isi tiket di chat |
+| **Belum tahu** | agen menyarankan **GitHub Projects** (repo di GitHub) atau **GitLab issue board** (repo di GitLab), lalu menunggu kamu memilih |
+
+Papan belum ada? Agen menawarkan membuatnya (hanya setelah kamu bilang "ya"). Pertanyaan lain yang menyusul:
 
 | Agen akan bertanya | Contoh jawaban |
 |---|---|
-| ID status Jira untuk Todo / In Progress / Ready To Review | pilih dari tabel yang ditampilkan agen |
+| Kode tiket (prefix) | `OPS` di Jira, atau `INFRA` untuk issue GitHub/GitLab (issue `#12` → `INFRA-12`) |
+| Status mana yang dipakai untuk Todo / In Progress / Ready To Review | pilih dari daftar yang ditampilkan agen (Done tidak pernah) |
 | Inventory mana yang staging dan mana yang production | `inventories/staging`, `inventories/production` |
 | Branch production dan branch integrasi | `master`, `develop` |
 | Lokasi file password Vault **staging** | `~/.ansible/vault-pass-staging` |
@@ -96,7 +108,7 @@ Ketik di Claude Code:
 
 | Kapan | Perintah | Hasilnya |
 | --- | --- | --- |
-| Ada tiket baru di Todo | `/validate-tiket OPS-1234` | Laporan kelayakan + komentar Jira; tiket pindah ke In Progress bila layak |
+| Ada tiket baru di Todo | `/validate-tiket OPS-1234` | Laporan kelayakan + komentar tiket; tiket pindah ke In Progress bila layak |
 | Tiket siap dikerjakan | `/develop-tiket OPS-1234` | Runbook, playbook, hasil uji staging, PR/MR; tiket ke Ready To Review |
 | Ada feedback dari reviewer/QA | `/rilis-tiket OPS-1234` | Tiket dikembalikan ke Todo, diuji ulang, atau PR-nya di-merge (setelah kamu bilang "ya") |
 | Mau rilis versi baru | `/branch-manager --rilis OPS-1400` | Daftar perubahan, cek staging, runbook production, PR rilis. Agen **berhenti** di sini sampai manusia menerapkan |
@@ -153,6 +165,8 @@ Agen akan **berhenti dan bertanya** kepadamu pada saat-saat ini. Cukup jawab di 
 | **Check mode** | Menjalankan playbook "pura-pura": hanya menampilkan apa yang *akan* berubah |
 | **Idempoten** | Dijalankan dua kali hasilnya sama. Agen selalu menjalankan dua kali; run kedua harus tanpa perubahan (`changed=0`) |
 | **Kunci staging** | Satu server staging dipakai satu agen pada satu waktu, supaya hasil uji tidak tercampur |
+| **Platform tiket** | Tempat tiket dikelola: Jira, GitHub Projects, GitLab issue board, atau manual. Tidak ada default; dipilih saat pertama dipakai |
+| **KODE** | Kode tiket yang dipakai agen di nama branch dan commit, mis. `OPS-12` atau `INFRA-12` |
 | **Pemilik DevOps** | Orang yang menyetujui setiap tiket sebelum PR/MR siap direview |
 | **Guard** | Pagar otomatis yang memblokir perintah berbahaya sebelum dijalankan |
 | **SPV** | Agen "mandor": membagi tugas ke agen lain dan memutuskan tiket selesai |
@@ -169,10 +183,13 @@ Tidak lewat jalur normal. Guard memblokir playbook, Vault, dan perintah tulis ke
 Itu berarti pagar bekerja. Baca pesannya; biasanya sudah menyebut cara yang benar. Daftar pesan umum: [docs/masalah-umum.md](docs/masalah-umum.md).
 
 **Di mana hasil kerja agen?**
-Di repo infrastruktur: `docs/runbooks/` (runbook), `docs/tickets/<KODE>/validasi.md` dan `uji.md` (laporan), ditambah PR/MR dan komentar Jira. Link laporan selalu ada di baris pertama komentar Jira.
+Di repo infrastruktur: `docs/runbooks/` (runbook), `docs/tickets/<KODE>/validasi.md` dan `uji.md` (laporan), ditambah PR/MR dan komentar tiket. Link laporan selalu ada di baris pertama komentar tiket.
+
+**Harus pakai Jira?**
+Tidak. Pilih Jira, GitHub Projects, GitLab issue board, atau tanpa platform. Agen bertanya di awal dan mengingat jawabannya per project; mengganti platform cukup dengan memberi tahu agen. Di platform mana pun, agen tidak pernah memindah tiket ke Done atau menutup issue, dan tidak menulis `Closes #12` di PR (kata itu menutup issue otomatis saat merge).
 
 **Rahasia (password, token) aman?**
-Agen hanya memakai Vault **staging**. Semua keluaran disaring `bin/redact.sh` sebelum ditulis ke dokumen, Jira, atau PR.
+Agen hanya memakai Vault **staging**. Semua keluaran disaring `bin/redact.sh` sebelum ditulis ke dokumen, tiket, atau PR.
 
 **Tim kami tidak pakai Ansible.**
 Kerangkanya tetap; ganti skill khas Ansible dengan padanannya (contoh Terraform di [docs/alat.md](docs/alat.md)).

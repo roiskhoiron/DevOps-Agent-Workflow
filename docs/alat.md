@@ -10,7 +10,7 @@ Agen memanggilnya sebagai `$AGENT_WORKFLOW_DIR/bin/<skrip>`. Kamu juga boleh men
 | `recap-check.sh` | Ringkas PLAY RECAP per host; `--idempotent` mewajibkan `changed=0` | `bin/recap-check.sh --idempotent /tmp/qa/OPS-12/apply-2.log` |
 | `redact.sh` | Saring keluaran ansible (password, token, `$ANSIBLE_VAULT`, kunci privat, `no_log`) sebelum masuk dokumen | `bin/redact.sh < check.log > check.safe.log` |
 | `risky-scan.sh` | Tandai baris yang menghapus data, me-restart layanan, atau mengubah firewall/akses di diff | `bin/risky-scan.sh upstream/develop HEAD` |
-| `release-trace.sh` | Lacak tiap commit `primary..protected` ke PR dan tiket Jira (TSV); exit 3 = hotfix belum di-back-merge | `bin/release-trace.sh upstream/main upstream/develop OPS` |
+| `release-trace.sh` | Lacak tiap commit `primary..protected` ke PR dan tiket (TSV); exit 3 = hotfix belum di-back-merge | `bin/release-trace.sh upstream/main upstream/develop OPS` |
 | `audit-mode.sh` | Nyalakan/matikan mode hanya-baca `/audit-issue` | `AGENT_LOCK_PID=$PPID bin/audit-mode.sh status` |
 | `housekeeping.sh` | Bersihkan sisa uji tiap jam: folder kerja agen lama, `~/.ansible/tmp`, log run lama, container Molecule, cache | otomatis (launchd / cron) |
 
@@ -27,10 +27,19 @@ Agen memanggilnya sebagai `$AGENT_WORKFLOW_DIR/bin/<skrip>`. Kamu juga boleh men
 
 **Alat lain selain Ansible?** Kerangka (skill flow, tim, guard, kunci, dokumen) tetap; yang diganti padanannya: `/write-playbook`, `/lint-playbook`, `/playbook-check`, `/apply-staging`, `/verify-idempotent`, bagian ansible di `hooks/guard.sh`, dan `recap-check.sh`. Contoh Terraform: `terraform validate`/`tflint` ↔ lint, `terraform plan` ↔ check mode, `apply` ke workspace staging ↔ apply staging, `plan` kedua tanpa perubahan ↔ idempotensi.
 
+## Platform tiket
+Tidak ada default; dipilih user saat pertama dipakai dan disimpan di memory project ([ticket-platform.md](../skills/_shared/ticket-platform.md)).
+| Platform | Alat yang dipakai agen |
+| --- | --- |
+| Jira | konektor Atlassian (lihat bawah) |
+| GitHub Issues + Projects | `gh issue view/list/comment`, `gh project item-list/item-edit` |
+| GitLab Issues + board | `glab issue view/list/note/update` dengan label `status::*` |
+| Manual | tidak ada; agen menulis komentar di laporan dan memberi tahu kamu |
+
 ## MCP dan konektor
 | Konektor | Dipakai untuk |
 | --- | --- |
-| **Atlassian** (Jira) | baca tiket, komentar, transisi (guard membatasi transisi) |
+| **Atlassian** (Jira) | hanya bila platform tiket = Jira: baca tiket, komentar, transisi (guard membatasi transisi) |
 | **Claude Docs** (opsional) | hanya bila memory project memilih Claude Docs sebagai platform laporan; runbook tetap di repo |
 
 ## Pembersihan otomatis
