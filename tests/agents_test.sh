@@ -36,30 +36,30 @@ done
 
 # every shared-doc / script / skill reference must resolve inside the repo
 files=$(ls "$REPO"/agents/*.md "$REPO"/skills/*/*.md 2>/dev/null)
-for r in $(cat $files | grep -oE '_devops-workflow-shared/[A-Za-z0-9_-]+\.md' | sort -u); do
-  assert_eq yes "$([ -f "$REPO/skills/_shared/${r#*/}" ] && echo yes || echo no)" "ref $r exists"
+for r in $(cat $files | grep -oE 'devops/skills/_shared/[A-Za-z0-9_-]+\.md' | sort -u); do
+  assert_eq yes "$([ -f "$REPO/skills/_shared/${r##*/}" ] && echo yes || echo no)" "ref $r exists"
 done
 for r in $(cat $files | grep -oE 'AGENT_WORKFLOW_DIR/(bin|templates)/[A-Za-z0-9_.-]+' | sort -u); do
   assert_eq yes "$([ -f "$REPO/${r#AGENT_WORKFLOW_DIR/}" ] && echo yes || echo no)" "ref $r exists"
 done
-for r in $(cat $files | grep -oE '~/\.claude/skills/[a-z-]+/SKILL\.md' | sort -u); do
-  n=${r#\~/.claude/skills/}; n=${n%/SKILL.md}
+for r in $(cat $files | grep -oE '~/\.agent-workflow/devops/skills/[a-z-]+/SKILL\.md' | sort -u); do
+  n=${r#\~/.agent-workflow/devops/skills/}; n=${n%/SKILL.md}
   assert_eq yes "$([ -f "$REPO/skills/$n/SKILL.md" ] && echo yes || echo no)" "ref $r exists"
 done
-for r in $(cat $files | grep -oE '~/\.claude/agents/[a-z-]+\.md' | sort -u); do
+for r in $(cat $files | grep -oE '~/\.agent-workflow/devops/agents/[a-z-]+\.md' | sort -u); do
   assert_eq yes "$([ -f "$REPO/agents/${r##*/}" ] && echo yes || echo no)" "ref $r exists"
 done
 # brace refs: ~/.claude/skills/{a,b}/SKILL.md and ~/.claude/agents/{a,b}.md
-for n in $(cat $files | grep -oE '~/\.claude/skills/\{[a-z,-]+\}' | sed 's/.*{//; s/}//' | tr , '\n' | sort -u); do
+for n in $(cat $files | grep -oE '~/\.agent-workflow/devops/skills/\{[a-z,-]+\}' | sed 's/.*{//; s/}//' | tr , '\n' | sort -u); do
   assert_eq yes "$([ -f "$REPO/skills/$n/SKILL.md" ] && echo yes || echo no)" "brace ref skills/$n exists"
 done
-for n in $(cat $files | grep -oE '~/\.claude/agents/\{[a-z,-]+\}' | sed 's/.*{//; s/}//' | tr , '\n' | sort -u); do
+for n in $(cat $files | grep -oE '~/\.agent-workflow/devops/agents/\{[a-z,-]+\}' | sed 's/.*{//; s/}//' | tr , '\n' | sort -u); do
   assert_eq yes "$([ -f "$REPO/agents/$n.md" ] && echo yes || echo no)" "brace ref agents/$n exists"
 done
 for d in rules infra credentials docs-platform release report-format ticket-platform; do
   assert_eq yes "$([ -f "$REPO/skills/_shared/$d.md" ] && echo yes || echo no)" "_shared/$d.md exists"
 done
-assert_eq "" "$(grep -l '_agent-workflow-shared' $files)" "no references to the mobile shared folder"
+assert_eq "" "$(grep -l '_agent-workflow-shared\|~/\.claude/' $files)" "no tool-specific (Claude) or mobile paths in skills/agents"
 # public repo: no user paths or private words (extra words: gitignored .private-denylist, one per line)
 assert_eq "" "$(grep -lE '/Users/|@gmail' $files "$REPO"/templates/* 2>/dev/null)" "no private identifiers"
 if [ -f "$REPO/.private-denylist" ]; then

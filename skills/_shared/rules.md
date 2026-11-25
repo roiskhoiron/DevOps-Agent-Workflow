@@ -7,9 +7,9 @@ Dua prinsip yang membedakan workflow DevOps dari role lain:
 2. **Agen tidak pernah menerapkan perubahan ke production.** Agen menyiapkan runbook dan PR rilis lalu berhenti; manusia atau pipeline yang menerapkan; agen hanya memeriksa hasilnya secara baca-saja (`/verify-live`).
 
 ## Lokasi
-- Dokumen bersama: `~/.claude/skills/_devops-workflow-shared/<file>.md`.
+- Dokumen bersama: `~/.agent-workflow/devops/skills/_shared/<file>.md`.
 - Skrip: `$AGENT_WORKFLOW_DIR/bin/<skrip>`. Jika `AGENT_WORKFLOW_DIR` kosong, isi dengan folder repo:
-  `export AGENT_WORKFLOW_DIR="$(cd "$(readlink ~/.claude/skills/_devops-workflow-shared)/../.." && pwd -P)"`
+  `export AGENT_WORKFLOW_DIR="$(cd ~/.agent-workflow/devops && pwd -P)"`
   Tiap panggilan Bash = shell baru: ulangi export ini di awal panggilan yang memakai skrip.
 - State lokal (bukan di repo): `${AGENT_WORKFLOW_STATE:-$HOME/.agent-workflow}/` — `ticket-transitions.json`, `ansible-inventories.json`, kunci (`locks/`), log run (`runs/`).
 - **Lokasi khusus project tidak pernah ditulis di konfigurasi global** (agen, skill, rules, guard, CLAUDE.md global). Agen membaca memory project Claude Code (`MEMORY.md` project) dan `## Catatan agen` di `CLAUDE.md` project. Belum ada → tanya user sekali (dengan satu saran), simpan sebagai memory project tipe `reference`, lalu pakai. Berubah/tidak ditemukan → perbarui setelah bertanya. Isi memory project DevOps:
@@ -46,7 +46,7 @@ Dua prinsip yang membedakan workflow DevOps dari role lain:
 | Auditor | opus (`claude-opus-5-5`) | `/audit-issue`: repo, riwayat git, log, fakta host (baca saja) | menulis repo/tiket/server |
 | Analis | opus (`claude-opus-5-5`) | `/audit-issue`: lampiran (diagram, PDF, log terlampir) | menulis repo/tiket/server |
 
-Management (SPV, Planner, Validator, Reviewer, Release) memutuskan dan berbicara ke luar: platform tiket, dokumen, git remote. Development (Coder, QA) hanya repo dan host staging; akses remote Coder = push branch tiketnya sendiri ke `origin`. Planner hanya penasihat SPV. Tim validasi (HoE, PjM, Spesialis eskalasi) hanya-baca dan melapor ke Validator. Housekeeping = skrip shell, tanpa agen. Model diubah di `~/.claude/agents/<peran>.md`.
+Management (SPV, Planner, Validator, Reviewer, Release) memutuskan dan berbicara ke luar: platform tiket, dokumen, git remote. Development (Coder, QA) hanya repo dan host staging; akses remote Coder = push branch tiketnya sendiri ke `origin`. Planner hanya penasihat SPV. Tim validasi (HoE, PjM, Spesialis eskalasi) hanya-baca dan melapor ke Validator. Housekeeping = skrip shell, tanpa agen. Model diubah di `~/.agent-workflow/devops/agents/<peran>.md`.
 
 ## Mode kerja
 - **Diawasi**: sesi biasa, user menyetujui izin.
@@ -106,13 +106,20 @@ Sama dengan workflow Mobile. Workspace = item Orca tempat terminal agen tampil: 
 ## Orkestrasi (SPV sebagai lead)
 Tiap worker = **teammate** Claude Code (agent teams). Orca menampilkannya sebagai panel split dengan label `@<nama>`; tidak ada panel atau tab yang dibuka sendiri.
 - **Syarat:** sesi SPV jalan dengan teammate mode: `claude --teammate-mode auto`, atau `/config` → Teammate mode = auto. Tool Agent tanpa parameter `name` = mode itu mati → tanya user: buka ulang sesi dengan teammate mode (saran), atau lanjut solo.
-- **Panggil:** tool Agent dengan `name: "<Nama>-<Label><n>"` (tabel di bawah), `subagent_type: <peran>` (`planner`, `coder`, `reviewer`, `qa`, `release`, `auditor`, `analis`, `hoe`, `pjm`, `eskalasi`) dan `model` sesuai peran (Planner dan Spesialis eskalasi: jangan isi `model`, alias `fable` menimpa ID di frontmatter). Prompt: "Ikuti `~/.claude/agents/<peran>.md`" + tugas (kode tiket, worktree, batas file, jatah host staging, folder laporan).
+- **Panggil:** tool Agent dengan `name: "<Nama>-<Label><n>"` (tabel di bawah), `subagent_type: <peran>` (`planner`, `coder`, `reviewer`, `qa`, `release`, `auditor`, `analis`, `hoe`, `pjm`, `eskalasi`) dan `model` sesuai peran (Planner dan Spesialis eskalasi: jangan isi `model`, alias `fable` menimpa ID di frontmatter). Prompt: "Ikuti `~/.agent-workflow/devops/agents/<peran>.md`" + tugas (kode tiket, worktree, batas file, jatah host staging, folder laporan).
 - **Lapor & tanya:** teammate mengirim hasil dan pertanyaan ke SPV lewat SendMessage. Pakai daftar tugas bersama tim.
 - **Pantau sampai tuntas (wajib, SPV):** tunggu dalam rentang terbatas (±10 menit), tiap rentang tulis satu baris status ke user. Teammate diam lebih dari satu rentang → minta status; tetap diam → cek jejaknya (commit/push, file laporan, kunci staging yang dipegang); macet → lepas kuncinya, hentikan, tugaskan ulang ke nama berikutnya dengan konteks posisi terakhir.
 - Tugas selesai hanya bila hasilnya terbukti ada (commit ter-push, komentar review di PR/MR, `report.md` + log run, link PR), bukan sekadar pesan "selesai". Hasil terbukti → hentikan teammate itu saat itu juga.
 - **Pakai ulang:** tugas lanjutan untuk agen yang sama → SendMessage ke nama yang sama, jangan panggil nama itu lagi. Pekerjaan paralel → nama berikutnya.
 - **Hentikan:** peran yang tugasnya habis → shutdown saat itu juga. Akhir batch atau berhenti lebih awal → hentikan semua teammate batch ini; pastikan tidak ada kunci tersisa.
 - Mode izin teammate mengikuti sesi SPV.
+
+**Tool selain Claude Code** (Codex, Gemini CLI, Cursor, Copilot, OpenCode, dll.; dipasang lewat `install.sh --agent`):
+- Punya subagen/agen kustom → pakai fitur itu dengan prompt "Ikuti `~/.agent-workflow/devops/agents/<peran>.md`" + tugas yang sama seperti di atas; nama agen tetap dari tabel.
+- Tidak punya subagen, atau tidak bisa menampilkan teammate → **mode solo**: satu sesi menjalankan peran berurutan (Coder → Reviewer → QA → Release) dengan membaca file perannya; catat di laporan bahwa review bukan independen. `--tim` diperlakukan sebagai `--solo` + catatan.
+- Kolom **Model** di tabel = default untuk Claude. Tool lain memakai model yang dipilih user di tool itu; peran yang butuh penalaran berat (SPV, Reviewer, Planner) sebaiknya memakai model terkuat yang tersedia.
+- Konektor MCP (mis. Atlassian) dipanggil dengan nama alat yang disediakan tool itu; operasinya tetap sama (`ticket-platform.md`).
+- Guard dipasang sebagai hook bila tool mendukung hook pemblokir; bila tidak, installer memberi tahu dan **semua pagar menjadi aturan yang wajib dipatuhi agen sendiri** — pakai mode persetujuan/sandbox tool itu untuk perintah shell.
 
 **Nama agen** (`name` teammate; di laporan/komentar ditulis `<Nama> (<Label><n>)`), sama dengan workflow Mobile:
 | Peran | Label | Nama berurutan |

@@ -5,7 +5,7 @@ model: opus
 ---
 Kamu **Analis** di `/audit-issue`. Kamu membaca lampiran dan membandingkannya; SPV yang menyimpulkan.
 
-Baca dulu: `~/.claude/skills/_devops-workflow-shared/rules.md`, `report-format.md`.
+Baca dulu: `~/.agent-workflow/devops/skills/_shared/rules.md`, `report-format.md`.
 
 ## Tugas
 1. Baca semua lampiran dari SPV: path lokal dan link bila alatnya tersedia di sesi.

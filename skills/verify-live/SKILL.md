@@ -5,7 +5,7 @@ argument-hint: vX.Y.Z
 ---
 Verifikasi production untuk rilis (`$ARGUMENTS`) **setelah** user memastikan penerapan selesai. Semua baca saja.
 
-Baca dulu: `~/.claude/skills/_devops-workflow-shared/infra.md` (Production: hanya baca), runbook-runbook rilis, memory project → Sumber log & monitoring.
+Baca dulu: `~/.agent-workflow/devops/skills/_shared/infra.md` (Production: hanya baca), runbook-runbook rilis, memory project → Sumber log & monitoring.
 
 ## Langkah
 1. Daftar cek dari bagian **Verifikasi** dan **Titik henti** tiap runbook rilis.

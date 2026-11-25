@@ -5,7 +5,7 @@ argument-hint: KODE-TIKET <playbook>
 ---
 Terapkan (`$ARGUMENTS`) ke **staging**. Hanya setelah review bersih dan area berisiko dijawab user (`/develop-tiket` langkah 7–8).
 
-Baca dulu: `~/.claude/skills/_devops-workflow-shared/infra.md`, `credentials.md`, runbook tiket.
+Baca dulu: `~/.agent-workflow/devops/skills/_shared/infra.md`, `credentials.md`, runbook tiket.
 
 ## Langkah
 1. Kunci staging (owner `<KODE>-qa<n>`), satu kunci untuk seluruh rangkaian apply 1 → Verifikasi → `/verify-idempotent`.

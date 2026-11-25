@@ -5,7 +5,7 @@ argument-hint: KODE-TIKET <playbook>
 ---
 Check mode untuk (`$ARGUMENTS`) ke **staging saja**. Production diblokir guard.
 
-Baca dulu: `~/.claude/skills/_devops-workflow-shared/infra.md` (Host staging, Log run), `credentials.md`.
+Baca dulu: `~/.agent-workflow/devops/skills/_shared/infra.md` (Host staging, Log run), `credentials.md`.
 
 ## Langkah
 1. Kunci staging (owner `<KODE>-<peran><n>`; rilis: `rilis-vX.Y.Z-qa1`):

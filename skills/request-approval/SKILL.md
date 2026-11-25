@@ -5,7 +5,7 @@ argument-hint: KODE-TIKET
 ---
 Minta persetujuan pemilik DevOps untuk (`$ARGUMENTS`). **Tidak pernah dilewati**, juga di mode otonom.
 
-Baca dulu: `~/.claude/skills/_devops-workflow-shared/report-format.md` (→ Ringkasan persetujuan), memory project → Pemilik DevOps.
+Baca dulu: `~/.agent-workflow/devops/skills/_shared/report-format.md` (→ Ringkasan persetujuan), memory project → Pemilik DevOps.
 
 ## Langkah
 1. Kumpulkan: link runbook, `check.safe.log` (ringkas per host), hasil `apply-1`/`apply-2` (`recap-check.sh`), Verifikasi, temuan `risky-scan.sh` + jawaban user, rollback singkat.

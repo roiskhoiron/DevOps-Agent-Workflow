@@ -3,11 +3,11 @@ name: branch-manager
 description: Siapkan rilis infrastruktur per versi dari branch integrasi ke branch production - tracing tiap commit ke tiket/PR/programmer, cek staging di commit rilis, finalisasi runbook production, PR rilis, lalu berhenti; manusia atau pipeline yang menerapkan, agen memverifikasi baca-saja dan membuat tag. Dipanggil lewat `/branch-manager --rilis KODE-TIKET`. Use when asked to prepare an infrastructure release, release notes, or a release PR; kata kunci - rilis versi, branch manager, PR rilis, tag versi.
 argument-hint: --rilis KODE-TIKET
 ---
-Siapkan rilis satu versi (`$ARGUMENTS`; `KODE-TIKET` = tiket tempat laporan rilis dikomentari). Sesi ini = **Release (Agen First)**: ikuti `~/.claude/agents/release.md`. Agen mengerjakan semua langkah dulu, lalu bertanya: **Konfirmasi / Tolak / Ikuti rekomendasi agen**. Argumen selain `--rilis KODE` (mis. `--hotfix`) → belum ada, berhenti dan tanya.
+Siapkan rilis satu versi (`$ARGUMENTS`; `KODE-TIKET` = tiket tempat laporan rilis dikomentari). Sesi ini = **Release (Agen First)**: ikuti `~/.agent-workflow/devops/agents/release.md`. Agen mengerjakan semua langkah dulu, lalu bertanya: **Konfirmasi / Tolak / Ikuti rekomendasi agen**. Argumen selain `--rilis KODE` (mis. `--hotfix`) → belum ada, berhenti dan tanya.
 
 **Agen tidak pernah menerapkan rilis ke production.** Setelah PR rilis siap, agen berhenti. Manusia atau pipeline (memory project → Pelaksana production) yang menerapkan; agen kembali untuk `/verify-live` dan tag.
 
-Baca dulu (jangan disalin ke sini): `~/.claude/skills/_devops-workflow-shared/rules.md`, `ticket-platform.md`, `release.md` (Rilis), `infra.md`, `docs-platform.md`, `report-format.md` (Laporan rilis), `credentials.md`. Skill set khas: `~/.claude/skills/{finalize-runbook,playbook-check,verify-live}/SKILL.md`. Skrip: `release-trace.sh`, `recap-check.sh`, `redact.sh`.
+Baca dulu (jangan disalin ke sini): `~/.agent-workflow/devops/skills/_shared/rules.md`, `ticket-platform.md`, `release.md` (Rilis), `infra.md`, `docs-platform.md`, `report-format.md` (Laporan rilis), `credentials.md`. Skill set khas: `~/.agent-workflow/devops/skills/{finalize-runbook,playbook-check,verify-live}/SKILL.md`. Skrip: `release-trace.sh`, `recap-check.sh`, `redact.sh`.
 
 ```mermaid
 flowchart LR

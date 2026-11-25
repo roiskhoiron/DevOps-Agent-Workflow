@@ -5,7 +5,7 @@ argument-hint: KODE-TIKET [playbook...]
 ---
 Lint perubahan tiket (`$ARGUMENTS`) di worktree tiket. Tidak menyentuh host mana pun.
 
-Baca dulu: `~/.claude/skills/_devops-workflow-shared/infra.md` (Alat uji, Log run).
+Baca dulu: `~/.agent-workflow/devops/skills/_shared/infra.md` (Alat uji, Log run).
 
 ## Langkah
 1. `mkdir -p "${TMPDIR:-/tmp}/qa/<KODE>"`.

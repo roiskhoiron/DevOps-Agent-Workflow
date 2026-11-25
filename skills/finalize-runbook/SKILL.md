@@ -5,7 +5,7 @@ argument-hint: vX.Y.Z <runbook>...
 ---
 Lengkapi bagian **Production** tiap runbook yang tersentuh rilis (`$ARGUMENTS`). Agen menulis rencana penerapan; **manusia atau pipeline yang menjalankannya**.
 
-Baca dulu: `~/.claude/skills/_devops-workflow-shared/docs-platform.md` (→ Runbook), `release.md` (Rilis), memory project → Pelaksana production, Pemilik DevOps.
+Baca dulu: `~/.agent-workflow/devops/skills/_shared/docs-platform.md` (→ Runbook), `release.md` (Rilis), memory project → Pelaksana production, Pemilik DevOps.
 
 ## Isi bagian Production
 | Butir | Isi |

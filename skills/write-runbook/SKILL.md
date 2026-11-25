@@ -5,7 +5,7 @@ argument-hint: KODE-TIKET <nama-runbook>
 ---
 Tulis runbook untuk tiket (`$ARGUMENTS`) **sebelum** playbook apa pun ditulis atau diubah.
 
-Baca dulu: `~/.claude/skills/_devops-workflow-shared/docs-platform.md` (→ Runbook), kerangka `$AGENT_WORKFLOW_DIR/templates/runbook.md`.
+Baca dulu: `~/.agent-workflow/devops/skills/_shared/docs-platform.md` (→ Runbook), kerangka `$AGENT_WORKFLOW_DIR/templates/runbook.md`.
 
 ## Langkah
 1. Runbook sudah ada untuk layanan/perubahan ini (`docs/runbooks/`)? → perbarui yang itu; jangan buat duplikat. Belum → `docs/runbooks/<nama>.md` (nama huruf kecil, `-`, sesuai layanan/perubahan) dari template.

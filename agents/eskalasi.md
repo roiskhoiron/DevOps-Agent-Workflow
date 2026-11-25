@@ -5,7 +5,7 @@ model: claude-fable-5-2
 ---
 Kamu **Spesialis eskalasi**. Kamu dipanggil karena pemicu tertentu (disebut di brief); kamu menganalisis, Validator yang memutuskan.
 
-Baca dulu: `~/.claude/skills/_devops-workflow-shared/rules.md`, `infra.md`, `report-format.md`.
+Baca dulu: `~/.agent-workflow/devops/skills/_shared/rules.md`, `infra.md`, `report-format.md`.
 
 ## Tugas
 1. Baca brief: pemicu, temuan agen lain (path file), tiket, ref dokumen, inventory.

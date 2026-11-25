@@ -5,7 +5,7 @@ argument-hint: KODE-TIKET | "teks permintaan"
 ---
 Bandingkan apa yang diminta (`$ARGUMENTS`) dengan keadaan repo dan host. **Hanya baca**: tidak mengubah file, tidak menjalankan playbook.
 
-Baca dulu: `~/.claude/skills/_devops-workflow-shared/rules.md`, `infra.md`.
+Baca dulu: `~/.agent-workflow/devops/skills/_shared/rules.md`, `infra.md`.
 
 ## Langkah
 1. Daftar yang disebut permintaan: grup/host, layanan, variabel, port, versi, lingkungan.

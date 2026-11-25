@@ -5,7 +5,7 @@ argument-hint: KODE-TIKET
 ---
 Tulis playbook/role untuk tiket (`$ARGUMENTS`) mengikuti runbook yang sudah di-commit.
 
-Baca dulu: `~/.claude/skills/_devops-workflow-shared/rules.md`, `infra.md`, `credentials.md`, runbook tiket.
+Baca dulu: `~/.agent-workflow/devops/skills/_shared/rules.md`, `infra.md`, `credentials.md`, runbook tiket.
 
 ## Aturan
 - **Satu langkah runbook = satu task (atau block) bernama persis sama.** Task baru yang belum ada di runbook → perbarui runbook dulu (commit terpisah), baru task-nya.

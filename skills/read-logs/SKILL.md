@@ -5,7 +5,7 @@ argument-hint: <layanan|KODE> [sejak] [sampai]
 ---
 Baca log untuk (`$ARGUMENTS`). **Baca saja**; tidak me-restart, tidak mengubah level log, tidak menghapus log.
 
-Baca dulu: `~/.claude/skills/_devops-workflow-shared/infra.md`, memory project → Sumber log & monitoring.
+Baca dulu: `~/.agent-workflow/devops/skills/_shared/infra.md`, memory project → Sumber log & monitoring.
 
 ## Sumber, berurutan
 1. **Log run agen sebelumnya:** `${AGENT_WORKFLOW_STATE:-$HOME/.agent-workflow}/runs/<KODE>-*/` dan `${TMPDIR:-/tmp}/qa/<KODE>/` (`recap-check.sh` untuk ringkasan per host).

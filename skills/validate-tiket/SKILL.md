@@ -5,7 +5,7 @@ argument-hint: KODE-TIKET... [--solo|--tim]
 ---
 Validasi satu atau lebih tiket infrastruktur (`$ARGUMENTS`). Peranmu = **Validator**; di mode tim kamu juga **SPV** validasi. Tidak menulis playbook/runbook, tidak memindah tiket ke Done, tidak menerapkan apa pun ke host.
 
-Baca dulu (jangan disalin ke sini): `~/.claude/skills/_devops-workflow-shared/rules.md`, `ticket-platform.md`, `infra.md`, `credentials.md`, `docs-platform.md`, `report-format.md`, dan `~/.claude/agents/validator.md`; mode tim juga `~/.claude/agents/{hoe,pjm,eskalasi}.md`. Skill set khas: `~/.claude/skills/inventory-check/SKILL.md`. Skrip: `$AGENT_WORKFLOW_DIR/bin/<skrip>` (`AGENT_WORKFLOW_DIR` seperti di `rules.md`).
+Baca dulu (jangan disalin ke sini): `~/.agent-workflow/devops/skills/_shared/rules.md`, `ticket-platform.md`, `infra.md`, `credentials.md`, `docs-platform.md`, `report-format.md`, dan `~/.agent-workflow/devops/agents/validator.md`; mode tim juga `~/.agent-workflow/devops/agents/{hoe,pjm,eskalasi}.md`. Skill set khas: `~/.agent-workflow/devops/skills/inventory-check/SKILL.md`. Skrip: `$AGENT_WORKFLOW_DIR/bin/<skrip>` (`AGENT_WORKFLOW_DIR` seperti di `rules.md`).
 
 **Mode:** sesi ini bertindak langsung sebagai Validator/SPV (bukan subagen `validator`), supaya akses platform tiket dan dokumen di satu tempat. Tiket berurutan.
 - `--solo` (atau tanpa flag untuk tiket kecil/jelas, satu layanan): sesi ini mengerjakan semua langkah.
@@ -21,7 +21,7 @@ flowchart LR
 ```
 
 ## Langkah (skill set berurutan)
-1. **`/setup-board`** (sekali): ikuti `~/.claude/skills/_devops-workflow-shared/ticket-platform.md`.
+1. **`/setup-board`** (sekali): ikuti `~/.agent-workflow/devops/skills/_shared/ticket-platform.md`.
    - Memory project → **Platform tiket** = **none** → **berhenti dan tanya user dulu** (Jira / GitHub Issues + Projects / GitLab Issues + board / manual / belum tahu). Belum tahu → sarankan GitHub Projects atau GitLab issue board sesuai host `git remote get-url origin`. Simpan jawaban + lokasi + prefix KODE.
    - **Cek akses** platform itu; gagal → berhenti, lapor cara memperbaikinya.
    - `ticket-transitions.json` belum punya entri project → "Setup status" (papan belum ada → tawarkan membuatnya, hanya setelah user bilang ya). Manual → lewati.
@@ -34,7 +34,7 @@ flowchart LR
    | **Requirement berubah/kurang** | Cek ulang dokumen + inventory; tidak jelas → tanya user/PM; keputusan memakai "Aturan keputusan" |
    Jejak ada tanpa komentar penolakan → tanya user apa yang ditolak. PR/MR sudah merged → putaran baru di branch `<jenis>/<KODE>-r<n>`.
 4. **`/sync-docs`** (sekali per sesi): `git fetch upstream`, baca dari `upstream/<protected>` tanpa checkout: `docs/runbooks/`, `docs/adr/`, inventory, `group_vars`/`host_vars`, role terkait. Platform dokumen lain → ambil versi terbaru. Catat ref yang dibaca.
-5. **`/inventory-check`** (skill set khas): bandingkan permintaan dengan inventory, variabel, dan dokumen; host/grup yang disebut tiket ada di staging dan production; layanan dan versi sekarang lewat modul baca (`setup`, `service_facts`, `package_facts`) bila perlu. **Bug** (layanan salah konfigurasi, error di host): kumpulkan bukti baca saja dengan `/read-logs` (`~/.claude/skills/read-logs/SKILL.md`) dan fakta host; tidak ada perubahan apa pun.
+5. **`/inventory-check`** (skill set khas): bandingkan permintaan dengan inventory, variabel, dan dokumen; host/grup yang disebut tiket ada di staging dan production; layanan dan versi sekarang lewat modul baca (`setup`, `service_facts`, `package_facts`) bila perlu. **Bug** (layanan salah konfigurasi, error di host): kumpulkan bukti baca saja dengan `/read-logs` (`~/.agent-workflow/devops/skills/read-logs/SKILL.md`) dan fakta host; tidak ada perubahan apa pun.
    Nilai dampak: host terdampak, layanan, area berisiko (hapus data, restart, firewall/akses), ukuran pekerjaan, dan apakah staging cukup mirip production untuk diuji.
 6. **`/find-related`**: tiket Todo/In Progress yang tidak di-link tapi menyentuh grup host, role, layanan, atau variabel yang sama (**cari tiket**), PR/MR terbuka di file yang sama, kunci staging yang sedang dipegang (`lock.sh who staging:<repo>/<inv>`). Link antar tiket tidak dibuat; cukup disarankan.
    **Aturan keputusan:**
@@ -54,7 +54,7 @@ flowchart LR
    | HoE | `claude-opus-5-5` | selalu: repo vs dokumen vs inventory, dampak host, fakta host baca saja |
    | PjM | `claude-sonnet-5-5` | selalu: tiket terkait, PR/MR terbuka, kunci staging, risiko bentrok |
    | Spesialis eskalasi | `claude-fable-5-2` (jangan isi `model`) | hanya bila: temuan HoE ambigu, tiket high-risk (data, akses/firewall, jaringan, autentikasi), atau konflik antar-agen |
-   Brief: KODE, ringkasan + AC, ref dokumen, repo + inventory, folder `${TMPDIR:-/tmp}/validate/<KODE>/`. Prompt: "Ikuti `~/.claude/agents/<peran>.md`". Gabungkan `${TMPDIR:-/tmp}/validate/<KODE>/*.md` jadi satu laporan. Hentikan teammate yang tugasnya habis.
+   Brief: KODE, ringkasan + AC, ref dokumen, repo + inventory, folder `${TMPDIR:-/tmp}/validate/<KODE>/`. Prompt: "Ikuti `~/.agent-workflow/devops/agents/<peran>.md`". Gabungkan `${TMPDIR:-/tmp}/validate/<KODE>/*.md` jadi satu laporan. Hentikan teammate yang tugasnya habis.
 10. **Ringkasan akhir:**
 
    | KODE | Keputusan | Laporan |
